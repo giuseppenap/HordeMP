@@ -6,6 +6,9 @@
 #include "GameFramework/Character.h"
 #include "HMP_PlayerCharacter.generated.h"
 
+class UCameraComponent;
+class USpringArmComponent;
+
 UCLASS()
 class HORDEMULTIPLAYER_API AHMP_PlayerCharacter : public ACharacter
 {
@@ -16,6 +19,13 @@ public:
 	AHMP_PlayerCharacter();
 
 protected:
+
+	UPROPERTY(VisibleAnywhere)
+	UCameraComponent* CameraComp;
+
+	UPROPERTY(VisibleAnywhere)
+	USpringArmComponent* SpringArmComp;
+	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
