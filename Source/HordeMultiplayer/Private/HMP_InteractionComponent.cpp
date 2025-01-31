@@ -4,6 +4,7 @@
 #include "HMP_InteractionComponent.h"
 
 #include "HMP_Gameplay_Interface.h"
+#include "DrawDebugHelpers.h"
 #include "InputBehavior.h"
 #include "EntitySystem/MovieSceneEntitySystemRunner.h"
 #include "Evaluation/IMovieSceneEvaluationHook.h"
@@ -44,25 +45,45 @@ void UHMP_InteractionComponent::PrimaryInteract()
 	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
 
 	AActor* MyOwner = GetOwner();
-	
 
 	FVector Eyelocation;
 	FRotator EyeRotation;
 	MyOwner->GetActorEyesViewPoint(Eyelocation, EyeRotation);
 
-	FVector End = Eyelocation + EyeRotation.Vector() * 1000;
+	FVector End = Eyelocation + (EyeRotation.Vector() * 1000);
 	
-	FHitResult Hit;
-	GetWorld()->LineTraceSingleByObjectType(Hit, Eyelocation, End, ObjectQueryParams);
+	//FHitResult Hit;
+	//bool bBlockingHit = GetWorld()->LineTraceSingleByObjectType(Hit, Eyelocation, End, ObjectQueryParams);
+	TArray<FHitResult> Hits;
 
-	AActor* HitActor = Hit.GetActor();
-	if (HitActor != nullptr)
+	float Radius = 30.0f;
+	
+	FCollisionShape CollisionShape;
+	CollisionShape.SetSphere(Radius);
+	bool bBlockingHit = GetWorld()->SweepMultiByObjectType(Hits, Eyelocation, End, FQuat::Identity, ObjectQueryParams, CollisionShape);
+
+	FColor LineColor = bBlockingHit ? FColor::Green : FColor::Red;
+
+	for (FHitResult Hit : Hits)
 	{
-		if (HitActor->Implements<UHMP_InteractionComponent>())
+		AActor* HitActor = Hit.GetActor();
+		if (HitActor)
 		{
-			APawn* MyPawn = Cast<APawn>(MyOwner);
+			if (HitActor->Implements<UHMP_InteractionComponent>())
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "HitActor");
+				APawn* MyPawn = Cast<APawn>(MyOwner);
 			
-			IHMP_Gameplay_Interface::Execute_Interact(HitActor, MyPawn);
+				IHMP_Gameplay_Interface::Execute_Interact(HitActor, MyPawn);
+			}
 		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, "HitActor was nullptr");
+		}
+		DrawDebugSphere(GetWorld(), Hit.ImpactPoint, Radius, 32, LineColor, false, 2.0f);
 	}
+	
+
+	DrawDebugLine(GetWorld(), Eyelocation, End, LineColor, false, 2.0f, 0,2.0f);
 }

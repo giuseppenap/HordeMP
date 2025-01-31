@@ -91,11 +91,13 @@ void AHMP_PlayerCharacter::MoveRight(float Value)
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
+	UE_LOG(LogTemp, Warning, TEXT("Player Attack Finished"));
  }
 
 void AHMP_PlayerCharacter::PrimaryInteract()
  {
 	InteractionComp->PrimaryInteract();
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Player Interact"));
  }
 
 
