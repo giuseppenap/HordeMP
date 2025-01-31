@@ -3,6 +3,7 @@
 
 #include "HMP_PlayerCharacter.h"
 
+#include "HMP_InteractionComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -18,6 +19,8 @@ AHMP_PlayerCharacter::AHMP_PlayerCharacter()
 
 	CameraComp = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
 	CameraComp->SetupAttachment(SpringArmComp);
+
+	InteractionComp = CreateDefaultSubobject<UHMP_InteractionComponent>("InteractionComponent");
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
@@ -39,7 +42,9 @@ void AHMP_PlayerCharacter::Tick(float DeltaTime)
 
 }
 
-// Called to bind functionality to input
+ 
+
+ // Called to bind functionality to input
 void AHMP_PlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -51,6 +56,7 @@ void AHMP_PlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 
 	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &AHMP_PlayerCharacter::PrimaryAttack);
+	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &AHMP_PlayerCharacter::PrimaryInteract);
 
 }
 
@@ -87,7 +93,10 @@ void AHMP_PlayerCharacter::MoveRight(float Value)
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
  }
 
-
+void AHMP_PlayerCharacter::PrimaryInteract()
+ {
+	InteractionComp->PrimaryInteract();
+ }
 
 
 
