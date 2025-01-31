@@ -3,6 +3,7 @@
 
 #include "HMP_InteractionComponent.h"
 
+#include "ContentBrowserItemData.h"
 #include "HMP_Gameplay_Interface.h"
 #include "DrawDebugHelpers.h"
 #include "InputBehavior.h"
@@ -69,9 +70,9 @@ void UHMP_InteractionComponent::PrimaryInteract()
 		AActor* HitActor = Hit.GetActor();
 		if (HitActor)
 		{
-			if (HitActor->Implements<UHMP_InteractionComponent>())
+			if (HitActor->Implements<UHMP_Gameplay_Interface>())
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, "HitActor");
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Hitactor is: ")) + HitActor->GetName());
 				APawn* MyPawn = Cast<APawn>(MyOwner);
 			
 				IHMP_Gameplay_Interface::Execute_Interact(HitActor, MyPawn);

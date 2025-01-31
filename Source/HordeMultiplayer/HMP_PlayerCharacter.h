@@ -9,6 +9,7 @@
 class UCameraComponent;
 class USpringArmComponent;
 class UHMP_InteractionComponent;
+class UAnimMontage;
 
 UCLASS()
 class HORDEMULTIPLAYER_API AHMP_PlayerCharacter : public ACharacter
@@ -17,8 +18,13 @@ class HORDEMULTIPLAYER_API AHMP_PlayerCharacter : public ACharacter
 
 protected:
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = Attack)
 	TSubclassOf<AActor> ProjectileClass;
+
+	UPROPERTY(EditAnywhere, Category = Attack)
+	UAnimMontage* AttackAnim;
+
+	FTimerHandle TimerHandle_PrimaryAttack;
 
 public:
 	// Sets default values for this character's properties
@@ -49,6 +55,8 @@ protected:
 
 	UFUNCTION()
 	void PrimaryInteract();
+	
+	void PrimaryAttack_TimeElapsed();
 	
 public:	
 	// Called every frame

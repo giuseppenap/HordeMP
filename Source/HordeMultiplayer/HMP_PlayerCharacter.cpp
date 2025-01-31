@@ -33,6 +33,7 @@ void AHMP_PlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	
 }
 
 // Called every frame
@@ -83,6 +84,18 @@ void AHMP_PlayerCharacter::MoveRight(float Value)
 
  void AHMP_PlayerCharacter::PrimaryAttack()
  {
+	PlayAnimMontage(AttackAnim);
+	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &AHMP_PlayerCharacter::PrimaryAttack_TimeElapsed, 0.17f);
+ }
+
+void AHMP_PlayerCharacter::PrimaryInteract()
+ {
+	InteractionComp->PrimaryInteract();
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Player Interact"));
+ }
+
+ void AHMP_PlayerCharacter::PrimaryAttack_TimeElapsed()
+ {
 	FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
 	
 	FTransform SpawnTM = FTransform(GetControlRotation(), HandLocation);
@@ -92,12 +105,6 @@ void AHMP_PlayerCharacter::MoveRight(float Value)
 	
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
 	UE_LOG(LogTemp, Warning, TEXT("Player Attack Finished"));
- }
-
-void AHMP_PlayerCharacter::PrimaryInteract()
- {
-	InteractionComp->PrimaryInteract();
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Player Interact"));
  }
 
 
