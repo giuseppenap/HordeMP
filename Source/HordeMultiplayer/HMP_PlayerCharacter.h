@@ -22,6 +22,15 @@ protected:
 	TSubclassOf<AActor> ProjectileClass;
 
 	UPROPERTY(EditAnywhere, Category = Attack)
+	TSubclassOf<AActor> SpecialProjectileClass;
+
+	UPROPERTY(EditAnywhere, Category = Attack)
+	TSubclassOf<AActor> DashProjectileClass;
+
+	UPROPERTY(EditAnywhere, Category = Attack)
+	TSubclassOf<AActor> AlternateProjectileClass;
+	
+	UPROPERTY(EditAnywhere, Category = Attack)
 	UAnimMontage* AttackAnim;
 
 	FTimerHandle TimerHandle_PrimaryAttack;
@@ -55,8 +64,28 @@ protected:
 
 	UFUNCTION()
 	void PrimaryInteract();
+
+	UFUNCTION()
+    void SpecialAttack();
+
+	UFUNCTION()
+	void Dash();
+
+	UFUNCTION()
+	void AlternateFire();
 	
+	UFUNCTION()
 	void PrimaryAttack_TimeElapsed();
+
+	UFUNCTION()
+	void SpecialAttack_TimeElapsed();
+
+	UFUNCTION()
+	void Dash_TimeElapsed();
+
+	UFUNCTION()
+	void AlternateFire_TimeElapsed();
+
 
 	UFUNCTION()
 	void SpawnProjectile(TSubclassOf<AActor> ClassToSpawn);

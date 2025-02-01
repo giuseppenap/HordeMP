@@ -60,6 +60,9 @@ void AHMP_PlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &AHMP_PlayerCharacter::PrimaryAttack);
 	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &AHMP_PlayerCharacter::PrimaryInteract);
+	PlayerInputComponent->BindAction("Special", IE_Pressed, this, &AHMP_PlayerCharacter::SpecialAttack);
+	PlayerInputComponent->BindAction("Dash", IE_Pressed, this, &AHMP_PlayerCharacter::Dash);
+	PlayerInputComponent->BindAction("Alternate", IE_Pressed, this, &AHMP_PlayerCharacter::AlternateFire);
 
 }
 
@@ -90,7 +93,25 @@ void AHMP_PlayerCharacter::MoveRight(float Value)
 	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &AHMP_PlayerCharacter::PrimaryAttack_TimeElapsed, 0.17f);
  }
 
-void AHMP_PlayerCharacter::PrimaryInteract()
+void AHMP_PlayerCharacter::SpecialAttack()
+ {
+	PlayAnimMontage(AttackAnim);
+	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &AHMP_PlayerCharacter::SpecialAttack_TimeElapsed, 0.17f);
+ }
+
+ void AHMP_PlayerCharacter::Dash()
+ {
+	PlayAnimMontage(AttackAnim);
+	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &AHMP_PlayerCharacter::Dash_TimeElapsed, 0.17f);
+ }
+
+ void AHMP_PlayerCharacter::AlternateFire()
+ {
+	PlayAnimMontage(AttackAnim);
+	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &AHMP_PlayerCharacter::AlternateFire_TimeElapsed, 0.17f);
+ }
+
+ void AHMP_PlayerCharacter::PrimaryInteract()
  {
 	InteractionComp->PrimaryInteract();
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Player Interact"));
@@ -101,6 +122,25 @@ void AHMP_PlayerCharacter::PrimaryInteract()
 	SpawnProjectile(ProjectileClass);
 	UE_LOG(LogTemp, Warning, TEXT("Player Attack Finished"));
  }
+
+ void AHMP_PlayerCharacter::SpecialAttack_TimeElapsed()
+ {
+	SpawnProjectile(SpecialProjectileClass);
+	UE_LOG(LogTemp, Warning, TEXT("Player Special Attack Finished"));
+ }
+
+ void AHMP_PlayerCharacter::Dash_TimeElapsed()
+ {
+	SpawnProjectile(DashProjectileClass);
+	UE_LOG(LogTemp, Warning, TEXT("Player Dash Attack Finished"));
+ }
+
+ void AHMP_PlayerCharacter::AlternateFire_TimeElapsed()
+ {
+	SpawnProjectile(AlternateProjectileClass);
+	UE_LOG(LogTemp, Warning, TEXT("Player Alternate Attack Finished"));
+ }
+
 
  void AHMP_PlayerCharacter::SpawnProjectile(TSubclassOf<AActor> ClassToSpawn)
  {

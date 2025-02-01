@@ -10,6 +10,7 @@
 class USphereComponent;
 class UNiagaraComponent;
 class UProjectileMovementComponent;
+class URadialForceComponent;
 
 UCLASS()
 class HORDEMULTIPLAYER_API AHMP_ProjectileBase : public AActor
@@ -21,16 +22,18 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Effects")
 	UNiagaraSystem* ImpactVFX;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	USphereComponent* SphereComp;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
 	UProjectileMovementComponent* MovementComp;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	UNiagaraComponent* EffectComp;
 
-
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	URadialForceComponent* ForceComp;
+	
 	//virtual so it can be overriden in child classes
 	UFUNCTION()
 	virtual void OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
