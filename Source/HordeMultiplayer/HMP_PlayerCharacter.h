@@ -57,6 +57,9 @@ protected:
 	void PrimaryInteract();
 	
 	void PrimaryAttack_TimeElapsed();
+
+	UFUNCTION()
+	void SpawnProjectile(TSubclassOf<AActor> ClassToSpawn);
 	
 public:	
 	// Called every frame

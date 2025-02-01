@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "HMP_ExplosiveBarrel.generated.h"
 
+class UStaticMeshComponent;
+class URadialForceComponent;
+
 UCLASS()
 class HORDEMULTIPLAYER_API AHMP_ExplosiveBarrel : public AActor
 {
@@ -13,11 +16,12 @@ class HORDEMULTIPLAYER_API AHMP_ExplosiveBarrel : public AActor
 
 protected:
 
-	//UPROPERTY(EditAnywhere)
-	//UStaticMeshComponent* BaseMeshComp;
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* BaseMeshComp;
 
-	//UPROPERTY(EditAnywhere)
-	//URadialForceComponent* RadialForce;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	URadialForceComponent* RadialForce;
+	
 	
 public:	
 	// Sets default values for this actor's properties
@@ -30,8 +34,12 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	
 
-	//UFUNCTION(BlueprintCallable)
-	//void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	virtual void PostInitializeComponents() override;
+	
+	UFUNCTION()
+	void OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 };
+

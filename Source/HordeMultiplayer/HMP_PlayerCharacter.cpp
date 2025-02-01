@@ -98,17 +98,50 @@ void AHMP_PlayerCharacter::PrimaryInteract()
 
  void AHMP_PlayerCharacter::PrimaryAttack_TimeElapsed()
  {
-	FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
-	
-	FTransform SpawnTM = FTransform(GetControlRotation(), HandLocation);
-
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-	SpawnParams.Instigator = this;
-	
-	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
+	SpawnProjectile(ProjectileClass);
 	UE_LOG(LogTemp, Warning, TEXT("Player Attack Finished"));
+ }
+
+ void AHMP_PlayerCharacter::SpawnProjectile(TSubclassOf<AActor> ClassToSpawn)
+ {
+	if (ensureAlways(ClassToSpawn))
+	{
+		FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
+		
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		SpawnParams.Instigator = this;
+
+		FCollisionShape Shape;
+		Shape.SetSphere(20.0f);
+
+		FCollisionQueryParams Params;
+		Params.AddIgnoredActor(this);
+
+		FCollisionObjectQueryParams ObjParams;
+		ObjParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+		ObjParams.AddObjectTypesToQuery(ECC_Pawn);
+		ObjParams.AddObjectTypesToQuery(ECC_WorldStatic);
+
+		FVector TraceStart = CameraComp->GetComponentLocation();
+
+		FVector TraceEnd = CameraComp->GetComponentLocation() + (GetControlRotation().Vector() * 5000);
+
+		FHitResult Hit;
+
+		if (GetWorld()->SweepSingleByObjectType(Hit, TraceStart, TraceEnd, FQuat::Identity, ObjParams, Shape, Params))
+		{
+			TraceEnd = Hit.ImpactPoint;
+		}
+
+		FRotator ProjRotation = FRotationMatrix::MakeFromX(TraceEnd - HandLocation).Rotator();
+
+		FTransform SpawnTM = FTransform(ProjRotation, HandLocation);
+		GetWorld()->SpawnActor<AActor>(ClassToSpawn, SpawnTM, SpawnParams);
+
+		//DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Cyan, false, 2.0f, 0,2.0f);
+	}
  }
 
 
