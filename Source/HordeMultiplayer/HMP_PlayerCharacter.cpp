@@ -62,7 +62,7 @@ void AHMP_PlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &AHMP_PlayerCharacter::PrimaryInteract);
 	PlayerInputComponent->BindAction("Special", IE_Pressed, this, &AHMP_PlayerCharacter::SpecialAttack);
 	PlayerInputComponent->BindAction("Dash", IE_Pressed, this, &AHMP_PlayerCharacter::Dash);
-	PlayerInputComponent->BindAction("Alternate", IE_Pressed, this, &AHMP_PlayerCharacter::AlternateFire);
+	PlayerInputComponent->BindAction("AlternateFire", IE_Pressed, this, &AHMP_PlayerCharacter::AlternateFire);
 
 }
 

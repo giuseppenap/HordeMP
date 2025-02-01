@@ -7,8 +7,10 @@
 #include "HMP_Gameplay_Interface.h"
 #include "DrawDebugHelpers.h"
 #include "InputBehavior.h"
+#include "Camera/CameraComponent.h"
 #include "EntitySystem/MovieSceneEntitySystemRunner.h"
 #include "Evaluation/IMovieSceneEvaluationHook.h"
+#include "HordeMultiplayer/HMP_PlayerCharacter.h"
 
 
 // Sets default values for this component's properties
@@ -46,45 +48,48 @@ void UHMP_InteractionComponent::PrimaryInteract()
 	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
 
 	AActor* MyOwner = GetOwner();
+	if (!MyOwner)
+	{
+		return;
+	}
 
-	FVector Eyelocation;
-	FRotator EyeRotation;
-	MyOwner->GetActorEyesViewPoint(Eyelocation, EyeRotation);
+	// Get Camera Component
+	UCameraComponent* CameraComp = MyOwner->FindComponentByClass<UCameraComponent>();
+	if (!CameraComp)
+	{
+		return;
+	}
 
-	FVector End = Eyelocation + (EyeRotation.Vector() * 1000);
-	
-	//FHitResult Hit;
-	//bool bBlockingHit = GetWorld()->LineTraceSingleByObjectType(Hit, Eyelocation, End, ObjectQueryParams);
-	TArray<FHitResult> Hits;
+	FVector CameraLocation = CameraComp->GetComponentLocation();
+	FRotator CameraRotation = CameraComp->GetComponentRotation(); // Get Rotation
 
-	float Radius = 30.0f;
-	
+	// Line trace forward from the camera
+	FVector TraceStart = CameraLocation;
+	FVector TraceEnd = TraceStart + (CameraRotation.Vector() * 5000);
+
+	// Perform the trace
+	FHitResult Hit;
 	FCollisionShape CollisionShape;
-	CollisionShape.SetSphere(Radius);
-	bool bBlockingHit = GetWorld()->SweepMultiByObjectType(Hits, Eyelocation, End, FQuat::Identity, ObjectQueryParams, CollisionShape);
+	CollisionShape.SetSphere(30.0f);
+    
+	bool bBlockingHit = GetWorld()->SweepSingleByObjectType(
+		Hit, TraceStart, TraceEnd, FQuat::Identity, ObjectQueryParams, CollisionShape
+	);
 
 	FColor LineColor = bBlockingHit ? FColor::Green : FColor::Red;
 
-	for (FHitResult Hit : Hits)
+	if (bBlockingHit)
 	{
+		TraceEnd = Hit.ImpactPoint;
 		AActor* HitActor = Hit.GetActor();
-		if (HitActor)
+		if (HitActor && HitActor->Implements<UHMP_Gameplay_Interface>())
 		{
-			if (HitActor->Implements<UHMP_Gameplay_Interface>())
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Hitactor is: ")) + HitActor->GetName());
-				APawn* MyPawn = Cast<APawn>(MyOwner);
-			
-				IHMP_Gameplay_Interface::Execute_Interact(HitActor, MyPawn);
-			}
+			APawn* MyPawn = Cast<APawn>(MyOwner);
+			IHMP_Gameplay_Interface::Execute_Interact(HitActor, MyPawn);
+			DrawDebugSphere(GetWorld(), Hit.ImpactPoint, 30.0f, 32, LineColor, false, 2.0f);
 		}
-		else
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, "HitActor was nullptr");
-		}
-		DrawDebugSphere(GetWorld(), Hit.ImpactPoint, Radius, 32, LineColor, false, 2.0f);
 	}
-	
 
-	DrawDebugLine(GetWorld(), Eyelocation, End, LineColor, false, 2.0f, 0,2.0f);
+	// Draw Debug Line
+	DrawDebugLine(GetWorld(), TraceStart + 100, TraceEnd, LineColor, false, 2.0f, 0, 2.0f);
 }
