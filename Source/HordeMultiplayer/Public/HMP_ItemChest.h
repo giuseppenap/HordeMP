@@ -28,10 +28,10 @@ public:
 
 protected:
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* BaseMesh;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* LidMesh;
 	
 	// Called when the game starts or when spawned

@@ -102,6 +102,8 @@ void AHMP_PlayerCharacter::PrimaryInteract()
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	SpawnParams.Instigator = this;
 	
 	GetWorld()->SpawnActor<AActor>(ProjectileClass, SpawnTM, SpawnParams);
 	UE_LOG(LogTemp, Warning, TEXT("Player Attack Finished"));
