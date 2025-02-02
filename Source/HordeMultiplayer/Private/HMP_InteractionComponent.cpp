@@ -10,7 +10,7 @@
 #include "Camera/CameraComponent.h"
 #include "EntitySystem/MovieSceneEntitySystemRunner.h"
 #include "Evaluation/IMovieSceneEvaluationHook.h"
-#include "HordeMultiplayer/HMP_PlayerCharacter.h"
+
 
 
 // Sets default values for this component's properties
