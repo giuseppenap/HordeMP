@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "HMP_AttributeComponent.h"
 #include "GameFramework/Character.h"
 #include "HMP_PlayerCharacter.generated.h"
 
@@ -17,7 +18,7 @@ class HORDEMULTIPLAYER_API AHMP_PlayerCharacter : public ACharacter
 	GENERATED_BODY()
 
 protected:
-
+	
 	UPROPERTY(EditAnywhere, Category = Attack)
 	TSubclassOf<AActor> ProjectileClass;
 
@@ -32,6 +33,9 @@ protected:
 	
 	UPROPERTY(EditAnywhere, Category = Attack)
 	UAnimMontage* AttackAnim;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UHMP_AttributeComponent* AttributeComp;
 
 	FTimerHandle TimerHandle_PrimaryAttack;
 

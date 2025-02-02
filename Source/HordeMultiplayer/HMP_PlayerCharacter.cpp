@@ -4,6 +4,7 @@
 #include "HMP_PlayerCharacter.h"
 
 #include "HMP_InteractionComponent.h"
+#include "HMP_AttributeComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -21,6 +22,8 @@ AHMP_PlayerCharacter::AHMP_PlayerCharacter()
 	CameraComp->SetupAttachment(SpringArmComp);
 
 	InteractionComp = CreateDefaultSubobject<UHMP_InteractionComponent>("InteractionComponent");
+
+	AttributeComp = CreateDefaultSubobject<UHMP_AttributeComponent>("AttributeComponent");
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 

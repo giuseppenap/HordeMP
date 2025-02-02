@@ -3,6 +3,7 @@
 
 #include "HMP_ProjectileBase.h"
 
+#include "HMP_AttributeComponent.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Components/SphereComponent.h"
@@ -19,6 +20,7 @@ AHMP_ProjectileBase::AHMP_ProjectileBase()
 	SphereComp->SetCollisionProfileName("Projectile");
 	SphereComp->OnComponentHit.AddDynamic(this, &AHMP_ProjectileBase::OnActorHit);
 	SphereComp->IgnoreActorWhenMoving(GetInstigator(), true);
+	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &AHMP_ProjectileBase::OnActorOverlap);
 	RootComponent = SphereComp;
 
 	EffectComp = CreateDefaultSubobject<UNiagaraComponent>("EffectComp");
@@ -39,8 +41,22 @@ AHMP_ProjectileBase::AHMP_ProjectileBase()
 
 }
 
+void AHMP_ProjectileBase::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor && OtherActor != GetInstigator())
+	{
+		UHMP_AttributeComponent* AttributeComp = Cast<UHMP_AttributeComponent>(OtherActor->GetComponentByClass(UHMP_AttributeComponent::StaticClass()));
+		if (AttributeComp)
+		{
+			AttributeComp->ApplyHealthChange(-20.0f);
+			Explode_Implementation();
+		}
+	}
+}
+
 void AHMP_ProjectileBase::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+                                     UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	Explode();
 }
