@@ -2,6 +2,9 @@
 
 
 #include "HMP_ExplosiveBarrel.h"
+
+#include "HMP_PlayerCharacter.h"
+#include "HMP_ProjectileBase.h"
 #include "Components/StaticMeshComponent.h"
 #include "PhysicsEngine/RadialForceComponent.h"
 
@@ -35,6 +38,15 @@ void AHMP_ExplosiveBarrel::PostInitializeComponents()
 
 void AHMP_ExplosiveBarrel::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	if (!OtherActor) return; // Safety check to avoid null references
+
+	// Check if the colliding actor is the player
+	if (OtherActor->IsA(AHMP_PlayerCharacter::StaticClass()))  // Replace APlayerCharacter with your actual player class
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Hit Player - Ignoring explosion"));
+		return; // Exit function early to prevent the rest of the logic from executing
+	}
+	
 	RadialForce->FireImpulse();
 
 	UE_LOG(LogTemp, Warning, TEXT("OtherActor: %s, at game time: %f"), *GetNameSafe(OtherActor), GetWorld()->TimeSeconds);

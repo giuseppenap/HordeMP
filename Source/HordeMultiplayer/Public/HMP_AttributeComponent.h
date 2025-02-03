@@ -6,6 +6,9 @@
 #include "Components/ActorComponent.h"
 #include "HMP_AttributeComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnHealthChanged, AActor*, InstigatorActor, UHMP_AttributeComponent*, OwningComp, float, NewHealth, float, Delta);
+//DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnHealthChanged, AActor* InstigatorActor, UHMP_AttributeComponent* OwningComp, float NewHealth, float Delta);
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class HORDEMULTIPLAYER_API UHMP_AttributeComponent : public UActorComponent
@@ -22,6 +25,9 @@ protected:
 	float Health;
 
 public:
+
+	UPROPERTY(BlueprintAssignable)
+	FOnHealthChanged OnHealthChanged;
 
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
 	bool ApplyHealthChange(float Delta);

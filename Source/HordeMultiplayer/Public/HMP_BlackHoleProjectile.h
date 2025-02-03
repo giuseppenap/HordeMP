@@ -13,5 +13,19 @@ UCLASS()
 class HORDEMULTIPLAYER_API AHMP_BlackHoleProjectile : public AHMP_ProjectileBase
 {
 	GENERATED_BODY()
+
+protected:
+	FTimerHandle SpecialAttackElapsed;
+
+public:
+	void BeginPlay() override;
+
+protected:
+
+	UFUNCTION()
+	void SpecialAttack_TimerElapsed();
+
+	UFUNCTION()
+	void AfterExplosion_TimerElapsed();
 	
 };
