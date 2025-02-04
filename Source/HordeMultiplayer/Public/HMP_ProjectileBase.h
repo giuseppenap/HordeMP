@@ -11,6 +11,9 @@ class USphereComponent;
 class UNiagaraComponent;
 class UProjectileMovementComponent;
 class URadialForceComponent;
+class UAudioComponent;
+class USoundAttenuation;
+class USoundBase;
 
 UCLASS()
 class HORDEMULTIPLAYER_API AHMP_ProjectileBase : public AActor
@@ -33,6 +36,18 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	URadialForceComponent* ForceComp;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
+	UAudioComponent* AudioComp;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Effects")
+	USoundCue* HitSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Effects")
+	USoundBase* HitSoundBase;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Effects")
+	USoundAttenuation* AttenuationProjectile;
 
 	UFUNCTION()
 	void OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

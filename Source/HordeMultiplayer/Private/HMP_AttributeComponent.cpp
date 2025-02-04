@@ -10,6 +10,13 @@ UHMP_AttributeComponent::UHMP_AttributeComponent()
 	
 }
 
+bool UHMP_AttributeComponent::IsAlive()
+{
+
+	return Health > 0.0f;
+	
+}
+
 
 bool UHMP_AttributeComponent::ApplyHealthChange(float Delta)
 {

@@ -6,6 +6,7 @@
 #include "HMP_AttributeComponent.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Components/AudioComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -39,6 +40,10 @@ AHMP_ProjectileBase::AHMP_ProjectileBase()
 	ForceComp->ImpulseStrength = 400.0f;
 	ForceComp->AddCollisionChannelToAffect(ECC_WorldDynamic);
 
+	AudioComp = CreateDefaultSubobject<UAudioComponent>("AudioComp");
+	AudioComp->SetupAttachment(RootComponent);
+	AudioComp->SetVolumeMultiplier(0.1f);
+
 }
 
 void AHMP_ProjectileBase::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -51,6 +56,8 @@ void AHMP_ProjectileBase::OnActorOverlap(UPrimitiveComponent* OverlappedComponen
 		{
 			AttributeComp->ApplyHealthChange(-20.0f);
 			Explode_Implementation();
+			AudioComp->FadeOut(0.6f,1);
+			UGameplayStatics::PlaySoundAtLocation(this, HitSoundBase, GetActorLocation(), GetActorRotation(), 0.1f, 1.0f, 0.0f, AttenuationProjectile);
 		}
 	}
 }
@@ -67,6 +74,8 @@ void AHMP_ProjectileBase::Explode_Implementation()
 	{
 		ForceComp->FireImpulse();
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactVFX, GetActorLocation());
+		AudioComp->FadeOut(0.6f,1);
+		UGameplayStatics::PlaySoundAtLocation(this, HitSoundBase, GetActorLocation(), GetActorRotation(), 0.1f, 1.0f, 0.0f, AttenuationProjectile);
 
 		Destroy();
 	}
@@ -75,6 +84,7 @@ void AHMP_ProjectileBase::Explode_Implementation()
 void AHMP_ProjectileBase::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
+	AudioComp->FadeIn(0.5f);
 }
 
 
