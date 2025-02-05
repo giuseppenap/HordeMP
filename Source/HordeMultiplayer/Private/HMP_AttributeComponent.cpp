@@ -7,25 +7,26 @@
 UHMP_AttributeComponent::UHMP_AttributeComponent()
 {
 	Health = 100;
+	MaxHealth = 100;
 	
 }
 
-bool UHMP_AttributeComponent::IsAlive()
+bool UHMP_AttributeComponent::IsAlive() const
 {
-
 	return Health > 0.0f;
-	
 }
 
 
 bool UHMP_AttributeComponent::ApplyHealthChange(float Delta)
 {
-	Health += Delta;
-
-	OnHealthChanged.Broadcast(nullptr, this, Health, Delta);
-
-	return true;
-	
+	if (Health >= 0.0f)
+	{
+		Health += Delta;
+		Health = FMath::Clamp(Health, 0.0f, MaxHealth);
+		OnHealthChanged.Broadcast(nullptr, this, Health, Delta, MaxHealth);
+        return true;
+	}
+	return false;
 }
 
 

@@ -89,6 +89,9 @@ protected:
 
 	UFUNCTION()
 	void AlternateFire_TimeElapsed();
+	
+	UFUNCTION()
+	void OnHealthChanged(AActor* InstigatorActor, UHMP_AttributeComponent* OwningComp, float NewHealth, float Delta, float MaxHealth);
 
 
 	UFUNCTION()
@@ -97,6 +100,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	virtual void PostInitializeComponents() override;
 
 	
 	// Called to bind functionality to input

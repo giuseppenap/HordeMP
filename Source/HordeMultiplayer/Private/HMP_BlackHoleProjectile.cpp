@@ -5,6 +5,7 @@
 
 #include "NiagaraFunctionLibrary.h"
 #include "Components/SphereComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "PhysicsEngine/RadialForceComponent.h"
 
 
@@ -22,6 +23,7 @@ void AHMP_BlackHoleProjectile::SpecialAttack_TimerElapsed()
 	ForceComp->ForceStrength = 0;
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactVFX, GetActorLocation());
 	ForceComp->FireImpulse();
+	UGameplayStatics::PlaySoundAtLocation(this, HitSoundBase, GetActorLocation(), GetActorRotation(), 0.1f, 1.0f, 0.0f, AttenuationProjectile);
 	UE_LOG(LogTemp, Warning, TEXT("BlackholeTimerElapsed"));
 	//Destroy();
 	

@@ -11,7 +11,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "PhysicsEngine/RadialForceComponent.h"
-#include "UObject/FastReferenceCollector.h"
+
 
 
 // Sets default values
@@ -43,6 +43,7 @@ AHMP_ProjectileBase::AHMP_ProjectileBase()
 	AudioComp = CreateDefaultSubobject<UAudioComponent>("AudioComp");
 	AudioComp->SetupAttachment(RootComponent);
 	AudioComp->SetVolumeMultiplier(0.1f);
+	
 
 }
 
@@ -54,10 +55,12 @@ void AHMP_ProjectileBase::OnActorOverlap(UPrimitiveComponent* OverlappedComponen
 		UHMP_AttributeComponent* AttributeComp = Cast<UHMP_AttributeComponent>(OtherActor->GetComponentByClass(UHMP_AttributeComponent::StaticClass()));
 		if (AttributeComp)
 		{
-			AttributeComp->ApplyHealthChange(-20.0f);
+			AttributeComp->ApplyHealthChange(-Damage);
 			Explode_Implementation();
 			AudioComp->FadeOut(0.6f,1);
 			UGameplayStatics::PlaySoundAtLocation(this, HitSoundBase, GetActorLocation(), GetActorRotation(), 0.1f, 1.0f, 0.0f, AttenuationProjectile);
+			//UCameraComponent* CameraComp = Cast<UCameraComponent>(OtherActor->GetComponentByClass(UCameraComponent::StaticClass()));
+			//ImpactShake->StartShake(CameraComp, , )
 		}
 	}
 }

@@ -19,11 +19,15 @@ AHMP_TargetDummy::AHMP_TargetDummy()
 
 
 void AHMP_TargetDummy::OnHealthChanged(AActor* InstigatorActor, UHMP_AttributeComponent* OwningComp, float NewHealth,
-	float Delta)
+	float Delta, float MaxHealth)
 {
 	if (Delta < 0.0f)
 	{
 		MeshComp->SetScalarParameterValueOnMaterials("TimeToHit", GetWorld()->GetTimeSeconds());
+		if (NewHealth == 0.0f)
+		{
+			MeshComp->SetScalarParameterValueOnMaterials("DissolveAmount", GetWorld()->GetTimeSeconds());
+		}
 	}
 }
 

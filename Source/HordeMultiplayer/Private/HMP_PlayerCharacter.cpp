@@ -46,7 +46,12 @@ void AHMP_PlayerCharacter::Tick(float DeltaTime)
 
 }
 
- 
+ void AHMP_PlayerCharacter::PostInitializeComponents()
+ {
+	Super::PostInitializeComponents();
+	AttributeComp->OnHealthChanged.AddDynamic(this, &AHMP_PlayerCharacter::OnHealthChanged);
+ }
+
 
  // Called to bind functionality to input
 void AHMP_PlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -142,6 +147,21 @@ void AHMP_PlayerCharacter::SpecialAttack()
  {
 	SpawnProjectile(AlternateProjectileClass);
 	UE_LOG(LogTemp, Warning, TEXT("Player Alternate Attack Finished"));
+ }
+
+ void AHMP_PlayerCharacter::OnHealthChanged(AActor* InstigatorActor, UHMP_AttributeComponent* OwningComp,
+	 float NewHealth, float Delta, float MaxHealth)
+ {
+	if (Delta < 0.0f)
+	{
+		GetMesh()->SetScalarParameterValueOnMaterials("TimeToHit", GetWorld()->GetTimeSeconds());
+	}
+	else
+	if (NewHealth <= 0.0f && Delta < 0.0f)
+	{
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		DisableInput(PC);
+	}
  }
 
 

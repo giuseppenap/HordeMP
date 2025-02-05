@@ -22,6 +22,7 @@ void AHMP_DashProjectile::BeginPlay()
 	Super::BeginPlay();
 
 	GetWorldTimerManager().SetTimer(TimerHandle_DelayedDetonate, this, &AHMP_DashProjectile::Explode_Implementation, DetonateDelay);
+	UGameplayStatics::PlaySoundAtLocation(this, HitSoundBase, GetActorLocation(), GetActorRotation(), 0.1f, 1.0f, 0.0f, AttenuationProjectile);
 }
 
 void AHMP_DashProjectile::Explode_Implementation()
