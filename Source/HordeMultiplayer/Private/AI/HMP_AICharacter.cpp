@@ -3,26 +3,49 @@
 
 #include "AI/HMP_AICharacter.h"
 
+#include "AI/HMP_AIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "Perception/PawnSensingComponent.h"
+
 // Sets default values
 AHMP_AICharacter::AHMP_AICharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
 
+	PawnSensingComp = CreateDefaultSubobject<UPawnSensingComponent>("PawnSensingComp");
+
+	/*AttributeComp = CreateDefaultSubobject<UHMP_AttributeComponent>("AttributeComp");
+	AttributeComp->OnHealthChanged.AddDynamic(this, &AHMP_AICharacter::OnHealthChanged);*/
 }
 
-// Called when the game starts or when spawned
-void AHMP_AICharacter::BeginPlay()
+void AHMP_AICharacter::PostInitializeComponents()
 {
-	Super::BeginPlay();
-	
+	Super::PostInitializeComponents();
+	PawnSensingComp->OnSeePawn.AddDynamic(this, &AHMP_AICharacter::OnPawnSeen);
 }
 
-// Called every frame
-void AHMP_AICharacter::Tick(float DeltaTime)
+void AHMP_AICharacter::OnPawnSeen(APawn* Pawn)
 {
-	Super::Tick(DeltaTime);
+	AHMP_AIController* AIC = Cast<AHMP_AIController>(GetController());
+	if (AIC)
+	{
+		UBlackboardComponent* BBComp = AIC->GetBlackboardComponent();
 
+		BBComp->SetValueAsObject("TargetActor", Pawn);
+
+		DrawDebugString(GetWorld(), GetActorLocation(), "Player SPOTTED", nullptr, FColor::White, 4.0f, true);
+	}
 }
+
+/*void AHMP_AICharacter::OnHealthChanged(AActor* InstigatorActor, UHMP_AttributeComponent* OwningComp, float NewHealth,
+	float Delta, float MaxHealth)
+{
+	if (Delta < 0.0f)
+	{
+		USkeletalMeshComponent* SKMesh = GetMesh();
+		SKMesh->SetScalarParameterValueOnMaterials("HitFlashTime", GetWorld()->GetTimeSeconds());
+	}
+}*/
+
+
 
 
