@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "HMP_AttributeComponent.h"
+#include "HMP_BlackHoleProjectile.h"
 #include "GameFramework/Character.h"
 #include "HMP_PlayerCharacter.generated.h"
 
@@ -36,6 +37,15 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UHMP_AttributeComponent* AttributeComp;
+	
+	UPROPERTY(EditAnywhere, Category = Attack)
+	UNiagaraSystem* MuzzleEffect;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	TSubclassOf<UCameraShakeBase> ImpactCameraShake;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	TSubclassOf<UCameraShakeBase> DeathCameraShake;
 
 	FTimerHandle TimerHandle_PrimaryAttack;
 

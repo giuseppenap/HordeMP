@@ -50,8 +50,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Effects")
 	USoundAttenuation* AttenuationProjectile;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Effects")
-	UCameraShakeBase* ImpactShake;
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	TSubclassOf<UCameraShakeBase> ImpactCameraShake;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Config")
 	float Damage;

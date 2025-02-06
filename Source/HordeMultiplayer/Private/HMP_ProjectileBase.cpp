@@ -59,8 +59,12 @@ void AHMP_ProjectileBase::OnActorOverlap(UPrimitiveComponent* OverlappedComponen
 			Explode_Implementation();
 			AudioComp->FadeOut(0.6f,1);
 			UGameplayStatics::PlaySoundAtLocation(this, HitSoundBase, GetActorLocation(), GetActorRotation(), 0.1f, 1.0f, 0.0f, AttenuationProjectile);
-			//UCameraComponent* CameraComp = Cast<UCameraComponent>(OtherActor->GetComponentByClass(UCameraComponent::StaticClass()));
-			//ImpactShake->StartShake(CameraComp, , )
+			APlayerController* PC = UGameplayStatics::GetPlayerController(GetInstigator(), 0);
+			if (PC && ImpactCameraShake)
+			{
+				PC->ClientStartCameraShake(ImpactCameraShake);	
+			}
+			
 		}
 	}
 }

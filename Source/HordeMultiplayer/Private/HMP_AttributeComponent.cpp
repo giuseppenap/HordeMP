@@ -29,5 +29,16 @@ bool UHMP_AttributeComponent::ApplyHealthChange(float Delta)
 	return false;
 }
 
+float UHMP_AttributeComponent::GetHealth()
+{
+	return Health;
+}
+
+float UHMP_AttributeComponent::GetMaxHealth()
+{
+	return MaxHealth;
+}
+
+
 
 

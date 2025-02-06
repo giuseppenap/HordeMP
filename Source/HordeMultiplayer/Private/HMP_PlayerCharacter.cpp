@@ -5,11 +5,13 @@
 
 #include "HMP_InteractionComponent.h"
 #include "HMP_AttributeComponent.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
 
-// Sets default values
+ // Sets default values
 AHMP_PlayerCharacter::AHMP_PlayerCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -122,31 +124,31 @@ void AHMP_PlayerCharacter::SpecialAttack()
  void AHMP_PlayerCharacter::PrimaryInteract()
  {
 	InteractionComp->PrimaryInteract();
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Player Interact"));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Player Interact"));
  }
 
  void AHMP_PlayerCharacter::PrimaryAttack_TimeElapsed()
  {
 	SpawnProjectile(ProjectileClass);
-	UE_LOG(LogTemp, Warning, TEXT("Player Attack Finished"));
+	//UE_LOG(LogTemp, Warning, TEXT("Player Attack Finished"));
  }
 
  void AHMP_PlayerCharacter::SpecialAttack_TimeElapsed()
  {
 	SpawnProjectile(SpecialProjectileClass);
-	UE_LOG(LogTemp, Warning, TEXT("Player Special Attack Finished"));
+	//UE_LOG(LogTemp, Warning, TEXT("Player Special Attack Finished"));
  }
 
  void AHMP_PlayerCharacter::Dash_TimeElapsed()
  {
 	SpawnProjectile(DashProjectileClass);
-	UE_LOG(LogTemp, Warning, TEXT("Player Dash Attack Finished"));
+	//UE_LOG(LogTemp, Warning, TEXT("Player Dash Attack Finished"));
  }
 
  void AHMP_PlayerCharacter::AlternateFire_TimeElapsed()
  {
 	SpawnProjectile(AlternateProjectileClass);
-	UE_LOG(LogTemp, Warning, TEXT("Player Alternate Attack Finished"));
+	//UE_LOG(LogTemp, Warning, TEXT("Player Alternate Attack Finished"));
  }
 
  void AHMP_PlayerCharacter::OnHealthChanged(AActor* InstigatorActor, UHMP_AttributeComponent* OwningComp,
@@ -155,11 +157,13 @@ void AHMP_PlayerCharacter::SpecialAttack()
 	if (Delta < 0.0f)
 	{
 		GetMesh()->SetScalarParameterValueOnMaterials("TimeToHit", GetWorld()->GetTimeSeconds());
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		PC->ClientStartCameraShake(ImpactCameraShake);
 	}
-	else
 	if (NewHealth <= 0.0f && Delta < 0.0f)
 	{
 		APlayerController* PC = Cast<APlayerController>(GetController());
+		PC->ClientStartCameraShake(DeathCameraShake);
 		DisableInput(PC);
 	}
  }
@@ -201,6 +205,7 @@ void AHMP_PlayerCharacter::SpecialAttack()
 		FRotator ProjRotation = FRotationMatrix::MakeFromX(TraceEnd - HandLocation).Rotator();
 
 		FTransform SpawnTM = FTransform(ProjRotation, HandLocation);
+		UNiagaraFunctionLibrary::SpawnSystemAttached(MuzzleEffect, GetMesh(),"Muzzle_01", FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget, true);
 		GetWorld()->SpawnActor<AActor>(ClassToSpawn, SpawnTM, SpawnParams);
 
 		//DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Cyan, false, 2.0f, 0,2.0f);
