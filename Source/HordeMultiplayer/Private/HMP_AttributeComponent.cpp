@@ -8,7 +8,6 @@ UHMP_AttributeComponent::UHMP_AttributeComponent()
 {
 	Health = 100;
 	MaxHealth = 100;
-	
 }
 
 bool UHMP_AttributeComponent::IsAlive() const
@@ -19,24 +18,34 @@ bool UHMP_AttributeComponent::IsAlive() const
 
 bool UHMP_AttributeComponent::ApplyHealthChange(float Delta)
 {
-	if (Health >= 0.0f)
-	{
-		Health += Delta;
-		Health = FMath::Clamp(Health, 0.0f, MaxHealth);
-		OnHealthChanged.Broadcast(nullptr, this, Health, Delta, MaxHealth);
-        return true;
-	}
-	return false;
+	float OldHealth = Health;
+	
+	Health = FMath::Clamp(Health + Delta, 0.0f, MaxHealth);
+
+	float ActualDelta = Health - OldHealth;
+	LastDamage = ActualDelta;
+	OnHealthChanged.Broadcast(nullptr, this, Health, ActualDelta);
+    return ActualDelta != 0;
 }
 
-float UHMP_AttributeComponent::GetHealth()
+float UHMP_AttributeComponent::GetHealth() const
 {
 	return Health;
 }
 
-float UHMP_AttributeComponent::GetMaxHealth()
+bool UHMP_AttributeComponent::IsFullHealth() const
+{
+	return Health == MaxHealth;
+}
+
+float UHMP_AttributeComponent::GetMaxHealth() const
 {
 	return MaxHealth;
+}
+
+float UHMP_AttributeComponent::GetLastDamage() const
+{
+	return LastDamage;
 }
 
 

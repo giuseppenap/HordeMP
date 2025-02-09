@@ -27,7 +27,7 @@ protected:
 	UStaticMeshComponent* MeshComp;
 
 	UFUNCTION()
-	void OnHealthChanged(AActor* InstigatorActor, UHMP_AttributeComponent* OwningComp, float NewHealth, float Delta, float MaxHealth);
+	void OnHealthChanged(AActor* InstigatorActor, UHMP_AttributeComponent* OwningComp, float NewHealth, float Delta);
 
 
 	virtual void PostInitializeComponents() override;

@@ -42,9 +42,6 @@ protected:
 	UAudioComponent* AudioComp;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Effects")
-	USoundCue* HitSound;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Effects")
 	USoundBase* HitSoundBase;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Effects")

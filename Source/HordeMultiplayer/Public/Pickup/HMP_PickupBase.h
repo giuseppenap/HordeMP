@@ -9,6 +9,8 @@
 #include "Components/SphereComponent.h"
 #include "HMP_PickupBase.generated.h"
 
+class USphereComponent;
+
 UCLASS()
 class HORDEMULTIPLAYER_API AHMP_PickupBase : public AActor, public IHMP_Gameplay_Interface
 {
@@ -24,19 +26,19 @@ public:
 protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Config")
-	UStaticMeshComponent* Mesh;
+	USphereComponent* SphereCollision;
+
+	FTimerHandle TimerHandle_RespawnTimer;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Config")
-	UNiagaraComponent* MeshVFX;
+	float RespawnTime;
 
-	/*UPROPERTY(EditDefaultsOnly, Category = "Config")
-	USphereComponent* SphereCollision;*/
+	UFUNCTION()
+	void ShowPowerup();
 	
+	void SetPowerupState(bool bNewIsActive);
 	
-
-	
-public:
-
+	void HideAndCooldownPowerup();
 	
 
 };

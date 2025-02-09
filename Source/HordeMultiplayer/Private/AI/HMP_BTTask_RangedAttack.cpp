@@ -2,7 +2,6 @@
 
 
 #include "AI/HMP_BTTask_RangedAttack.h"
-
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
@@ -19,7 +18,8 @@ EBTNodeResult::Type UHMP_BTTask_RangedAttack::ExecuteTask(UBehaviorTreeComponent
 			return EBTNodeResult::Failed;
 		}
 
-		FVector MuzzleLocation = MyPawn->GetMesh()->GetSocketLocation("Muzzle_01");
+		ProjectileSocket = "Muzzle01";
+		FVector MuzzleLocation = MyPawn->GetMesh()->GetSocketLocation(ProjectileSocket);
 
 		AActor* TargetActor = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("TargetActor"));
 		if (TargetActor == nullptr)

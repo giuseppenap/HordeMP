@@ -27,7 +27,7 @@ void UHMP_BTService_CheckAttackRange::TickNode(UBehaviorTreeComponent& OwnerComp
 				{
 					float DistanceTo = FVector::Distance(TargetActor->GetActorLocation(), AIPawn->GetActorLocation());
 
-					bool bWithinRange = DistanceTo < 2000.0f;
+					bool bWithinRange = DistanceTo < AllowedShootingDistance;
 
 					bool bHasLOS = false;
 

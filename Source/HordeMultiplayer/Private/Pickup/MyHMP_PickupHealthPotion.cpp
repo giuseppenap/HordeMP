@@ -5,47 +5,33 @@
 
 #include "HMP_AttributeComponent.h"
 #include "NiagaraComponent.h"
-#include "Kismet/GameplayStatics.h"
+
+AMyHMP_PickupHealthPotion::AMyHMP_PickupHealthPotion()
+{
+	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
+	MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	MeshComp->SetupAttachment(RootComponent);
+
+	MeshVFX = CreateDefaultSubobject<UNiagaraComponent>("MeshVFX");
+	MeshVFX->SetupAttachment(RootComponent);
+}
 
 void AMyHMP_PickupHealthPotion::Interact_Implementation(APawn* InstigatorPawn)
 {
-	Super::Interact_Implementation(InstigatorPawn);
+	if (!ensure(InstigatorPawn))
+	{
+		return;
+	}
+
 	UHMP_AttributeComponent* AttributeComp = Cast<UHMP_AttributeComponent>(InstigatorPawn->GetComponentByClass(UHMP_AttributeComponent::StaticClass()));
 
-	if (AttributeComp)
+	if (ensure(AttributeComp) && !AttributeComp->IsFullHealth())
 	{
-		float CurrentHealth = AttributeComp->GetHealth();
-		float MaxHealth = AttributeComp->GetMaxHealth();
-			if (MaxHealth > CurrentHealth)
-			{
-				Mesh->SetScalarParameterValueOnMaterials("TimeToHit", GetWorld()->GetTimeSeconds());
-				AttributeComp->ApplyHealthChange(HealAmount);
-				GetWorldTimerManager().SetTimer(InactivateTimer, this, &AMyHMP_PickupHealthPotion::ReactivatePickup, InactivationTime);
-				GetWorldTimerManager().SetTimer(ActivationTimer, this, &AMyHMP_PickupHealthPotion::InactivatePickup, 0.5f);
-			}
+		if (AttributeComp->ApplyHealthChange(HealAmount))
+		{
+			HideAndCooldownPowerup();
+		}
 	}
 }
 
-void AMyHMP_PickupHealthPotion::InactivatePickup()
-{
-	Mesh->SetVisibility(false);
-	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	if (MeshVFX)
-	{
-		MeshVFX->SetVisibility(false);
-		MeshVFX->Deactivate();
-	}
-	
-}
 
-void AMyHMP_PickupHealthPotion::ReactivatePickup()
-{
-	Mesh->SetVisibility(true);
-	Mesh->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
-	if (MeshVFX)
-	{
-		MeshVFX->SetVisibility(true);
-		MeshVFX->Activate();
-	}
-
-}

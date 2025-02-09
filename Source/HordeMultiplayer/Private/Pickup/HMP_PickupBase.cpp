@@ -4,7 +4,6 @@
 #include "Pickup/HMP_PickupBase.h"
 
 #include "NiagaraComponent.h"
-#include "Components/BoxComponent.h"
 
 class UStaticMeshComponent;
 
@@ -12,25 +11,35 @@ class UStaticMeshComponent;
 AHMP_PickupBase::AHMP_PickupBase()
 {
 
-	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
-	RootComponent = Mesh;
-
-	MeshVFX = CreateDefaultSubobject<UNiagaraComponent>("MeshVFX");
-	MeshVFX->SetupAttachment(RootComponent);
-
-	/*SphereCollision = CreateDefaultSubobject<USphereComponent>("SphereCollision");
-	SphereCollision->SetupAttachment(RootComponent);
-	SphereCollision->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
-	SphereCollision->SetCollisionProfileName("Pickup");*/
-	
- 
+	SphereCollision = CreateDefaultSubobject<USphereComponent>("SphereComp");
+	SphereCollision->SetCollisionProfileName("Pickup");
+	RootComponent = SphereCollision;
 
 }
 
 void AHMP_PickupBase::Interact_Implementation(APawn* InstigatorPawn)
 {
-	IHMP_Gameplay_Interface::Interact_Implementation(InstigatorPawn);
+	
+}
+
+void AHMP_PickupBase::ShowPowerup()
+{
+	SetPowerupState(true);
 }
 
 
+void AHMP_PickupBase::HideAndCooldownPowerup()
+{
+	SetPowerupState(false);
+
+	GetWorldTimerManager().SetTimer(TimerHandle_RespawnTimer, this, &AHMP_PickupBase::ShowPowerup, RespawnTime);
+}
+
+void AHMP_PickupBase::SetPowerupState(bool bNewIsActive)
+{
+	SetActorEnableCollision(bNewIsActive);
+
+	//Propagate Changes from the root to the children -> true variable
+	RootComponent->SetVisibility(bNewIsActive, true);
+}
 

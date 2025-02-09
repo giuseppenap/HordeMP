@@ -6,6 +6,10 @@
 #include "Pickup/HMP_PickupBase.h"
 #include "MyHMP_PickupHealthPotion.generated.h"
 
+
+class UStaticMeshComponent;
+class UNiagaraComponent;
+
 /**
  * 
  */
@@ -16,11 +20,16 @@ class HORDEMULTIPLAYER_API AMyHMP_PickupHealthPotion : public AHMP_PickupBase
 
 public:
 
-	UPROPERTY(EditDefaultsOnly, Category = "Config")
-	float HealAmount;
+	AMyHMP_PickupHealthPotion();
+
+	UPROPERTY(EditAnywhere, Category = "Config")
+	UStaticMeshComponent* MeshComp;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Config")
-	float InactivationTime;
+	UNiagaraComponent* MeshVFX;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Config")
+	float HealAmount;
 
 	FTimerHandle InactivateTimer;
 
@@ -28,12 +37,7 @@ public:
 
 	
 	UFUNCTION()
-	void Interact_Implementation(APawn* InstigatorPawn) override;
-
-	UFUNCTION()
-	void InactivatePickup();
-
-	UFUNCTION()
-	void ReactivatePickup();
+	virtual void Interact_Implementation(APawn* InstigatorPawn) override;
+	
 	
 };

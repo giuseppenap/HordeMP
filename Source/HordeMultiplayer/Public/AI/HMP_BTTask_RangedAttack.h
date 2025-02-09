@@ -20,5 +20,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "AI")
 	TSubclassOf<AActor> ProjectileClass;
+
+	UPROPERTY(VisibleAnywhere, Category = "AI")
+	FName ProjectileSocket;
 	
 };

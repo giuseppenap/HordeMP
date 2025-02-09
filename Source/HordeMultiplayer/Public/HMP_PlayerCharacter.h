@@ -63,6 +63,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	UHMP_InteractionComponent* InteractionComp;
+
+	UPROPERTY(VisibleAnywhere)
+	FName ProjSocketLocation;
 	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -101,7 +104,7 @@ protected:
 	void AlternateFire_TimeElapsed();
 	
 	UFUNCTION()
-	void OnHealthChanged(AActor* InstigatorActor, UHMP_AttributeComponent* OwningComp, float NewHealth, float Delta, float MaxHealth);
+	void OnHealthChanged(AActor* InstigatorActor, UHMP_AttributeComponent* OwningComp, float NewHealth, float Delta);
 
 
 	UFUNCTION()

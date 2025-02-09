@@ -6,8 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "HMP_AttributeComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(FOnHealthChanged, AActor*, InstigatorActor, UHMP_AttributeComponent*, OwningComp, float, NewHealth, float, Delta, float, MaxHealth);
-//DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnHealthChanged, AActor* InstigatorActor, UHMP_AttributeComponent* OwningComp, float NewHealth, float Delta);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnHealthChanged, AActor*, InstigatorActor, UHMP_AttributeComponent*, OwningComp, float, NewHealth, float, Delta);
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -27,6 +26,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
 	float MaxHealth;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
+	float LastDamage;
+
 public:
 
 	UFUNCTION(BlueprintCallable)
@@ -39,13 +41,16 @@ public:
 	bool ApplyHealthChange(float Delta);
 
 	UFUNCTION()
-	float GetHealth();
-
+	float GetHealth() const;
 
 	UFUNCTION()
-	float GetMaxHealth();
-private:
+	bool IsFullHealth() const;
 
+	UFUNCTION()
+	float GetMaxHealth() const;
+
+	UFUNCTION()
+	float GetLastDamage() const;
 
 		
 };

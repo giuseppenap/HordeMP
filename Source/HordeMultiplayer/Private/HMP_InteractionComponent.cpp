@@ -1,15 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "HMP_InteractionComponent.h"
 
-#include "ContentBrowserItemData.h"
+#include "HMP_InteractionComponent.h"
 #include "HMP_Gameplay_Interface.h"
 #include "DrawDebugHelpers.h"
-#include "InputBehavior.h"
 #include "Camera/CameraComponent.h"
-#include "EntitySystem/MovieSceneEntitySystemRunner.h"
-#include "Evaluation/IMovieSceneEvaluationHook.h"
+
 
 
 
@@ -86,10 +83,10 @@ void UHMP_InteractionComponent::PrimaryInteract()
 		{
 			APawn* MyPawn = Cast<APawn>(MyOwner);
 			IHMP_Gameplay_Interface::Execute_Interact(HitActor, MyPawn);
-			//DrawDebugSphere(GetWorld(), Hit.ImpactPoint, 30.0f, 32, LineColor, false, 2.0f);
+			DrawDebugSphere(GetWorld(), Hit.ImpactPoint, 30.0f, 32, LineColor, false, 2.0f);
 		}
 	}
 
 	// Draw Debug Line
-	//DrawDebugLine(GetWorld(), TraceStart, TraceEnd, LineColor, false, 2.0f, 0, 2.0f);
+	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, LineColor, false, 2.0f, 0, 2.0f);
 }

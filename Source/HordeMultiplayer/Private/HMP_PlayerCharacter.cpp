@@ -152,7 +152,7 @@ void AHMP_PlayerCharacter::SpecialAttack()
  }
 
  void AHMP_PlayerCharacter::OnHealthChanged(AActor* InstigatorActor, UHMP_AttributeComponent* OwningComp,
-	 float NewHealth, float Delta, float MaxHealth)
+	 float NewHealth, float Delta)
  {
 	if (Delta < 0.0f)
 	{
