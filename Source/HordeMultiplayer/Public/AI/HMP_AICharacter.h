@@ -20,8 +20,11 @@ public:
 
 protected:
 
-	/*UPROPERTY(VisibleAnywhere)
-	UHMP_AttributeComponent* AttributeComp;*/
+	UFUNCTION()
+	void SetTargetActor(AActor* NewTarget);
+	
+	UPROPERTY(VisibleAnywhere)
+	UHMP_AttributeComponent* AttributeComp;
 
 	virtual void PostInitializeComponents() override;
 
@@ -31,8 +34,8 @@ protected:
 	UFUNCTION()
 	void OnPawnSeen(APawn* Pawn);
 
-	/*UFUNCTION()
-	void OnHealthChanged(AActor* InstigatorActor, UHMP_AttributeComponent* OwningComp, float NewHealth, float Delta, float MaxHealth);*/
+	UFUNCTION()
+	void OnHealthChangedImplementation(AActor* InstigatorActor, UHMP_AttributeComponent* OwningComp, float NewHealth, float Delta);
 	
 
 };

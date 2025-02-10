@@ -23,5 +23,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	FName ProjectileSocket;
+
 	
 };

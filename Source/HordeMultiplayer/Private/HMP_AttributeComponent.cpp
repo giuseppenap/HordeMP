@@ -16,7 +16,7 @@ bool UHMP_AttributeComponent::IsAlive() const
 }
 
 
-bool UHMP_AttributeComponent::ApplyHealthChange(float Delta)
+bool UHMP_AttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delta)
 {
 	float OldHealth = Health;
 	
@@ -24,7 +24,7 @@ bool UHMP_AttributeComponent::ApplyHealthChange(float Delta)
 
 	float ActualDelta = Health - OldHealth;
 	LastDamage = ActualDelta;
-	OnHealthChanged.Broadcast(nullptr, this, Health, ActualDelta);
+	OnHealthChanged.Broadcast(InstigatorActor, this, Health, ActualDelta);
     return ActualDelta != 0;
 }
 

@@ -17,9 +17,8 @@ EBTNodeResult::Type UHMP_BTTask_RangedAttack::ExecuteTask(UBehaviorTreeComponent
 		{
 			return EBTNodeResult::Failed;
 		}
-
-		ProjectileSocket = "Muzzle01";
-		FVector MuzzleLocation = MyPawn->GetMesh()->GetSocketLocation(ProjectileSocket);
+		
+		FVector MuzzleLocation = MyPawn->GetMesh()->GetSocketLocation("Muzzle_Front");
 
 		AActor* TargetActor = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("TargetActor"));
 		if (TargetActor == nullptr)
@@ -32,6 +31,7 @@ EBTNodeResult::Type UHMP_BTTask_RangedAttack::ExecuteTask(UBehaviorTreeComponent
 
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SpawnParams.Instigator = MyPawn;
 
 		AActor* NewProj = GetWorld()->SpawnActor<AActor>(ProjectileClass, MuzzleLocation, MuzzleRotation, SpawnParams);
 

@@ -27,7 +27,7 @@ void AMyHMP_PickupHealthPotion::Interact_Implementation(APawn* InstigatorPawn)
 
 	if (ensure(AttributeComp) && !AttributeComp->IsFullHealth())
 	{
-		if (AttributeComp->ApplyHealthChange(HealAmount))
+		if (AttributeComp->ApplyHealthChange(this, HealAmount))
 		{
 			HideAndCooldownPowerup();
 		}

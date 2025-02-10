@@ -19,9 +19,7 @@ AHMP_ProjectileBase::AHMP_ProjectileBase()
 {
  	SphereComp = CreateDefaultSubobject<USphereComponent>("SphereComp");
 	SphereComp->SetCollisionProfileName("Projectile");
-	SphereComp->OnComponentHit.AddDynamic(this, &AHMP_ProjectileBase::OnActorHit);
-	SphereComp->IgnoreActorWhenMoving(GetInstigator(), true);
-	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &AHMP_ProjectileBase::OnActorOverlap);
+
 	RootComponent = SphereComp;
 
 	EffectComp = CreateDefaultSubobject<UNiagaraComponent>("EffectComp");
@@ -47,6 +45,15 @@ AHMP_ProjectileBase::AHMP_ProjectileBase()
 
 }
 
+void AHMP_ProjectileBase::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	AudioComp->FadeIn(0.5f);
+	SphereComp->OnComponentHit.AddDynamic(this, &AHMP_ProjectileBase::OnActorHit);
+	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &AHMP_ProjectileBase::OnActorOverlap);
+	SphereComp->IgnoreActorWhenMoving(GetInstigator(), true);
+}
+
 void AHMP_ProjectileBase::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -55,7 +62,7 @@ void AHMP_ProjectileBase::OnActorOverlap(UPrimitiveComponent* OverlappedComponen
 		UHMP_AttributeComponent* AttributeComp = Cast<UHMP_AttributeComponent>(OtherActor->GetComponentByClass(UHMP_AttributeComponent::StaticClass()));
 		if (AttributeComp)
 		{
-			AttributeComp->ApplyHealthChange(-Damage);
+			AttributeComp->ApplyHealthChange(GetInstigator(), -Damage);
 			Explode_Implementation();
 			AudioComp->FadeOut(0.6f,1);
 			UGameplayStatics::PlaySoundAtLocation(this, HitSoundBase, GetActorLocation(), GetActorRotation(), 0.1f, 1.0f, 0.0f, AttenuationProjectile);
@@ -72,7 +79,10 @@ void AHMP_ProjectileBase::OnActorOverlap(UPrimitiveComponent* OverlappedComponen
 void AHMP_ProjectileBase::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
                                      UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	Explode();
+	if (OtherActor != GetInstigator())
+	{
+		Explode();
+	}
 }
 
 void AHMP_ProjectileBase::Explode_Implementation()
@@ -88,11 +98,6 @@ void AHMP_ProjectileBase::Explode_Implementation()
 	}
 }
 
-void AHMP_ProjectileBase::PostInitializeComponents()
-{
-	Super::PostInitializeComponents();
-	AudioComp->FadeIn(0.5f);
-}
 
 
 
