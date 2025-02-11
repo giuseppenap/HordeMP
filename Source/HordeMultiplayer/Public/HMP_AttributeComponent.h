@@ -14,7 +14,14 @@ class HORDEMULTIPLAYER_API UHMP_AttributeComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
+
+	UFUNCTION(BlueprintCallable, Category = "Attributes")
+	static UHMP_AttributeComponent* GetAttributes(AActor* FromActor);
+
+	UFUNCTION(BlueprintCallable, Category = "Attributes", meta = (DisplayName = "IsAlive"))
+	static bool IsActorAlive(AActor* Actor);
+	
 	// Sets default values for this component's properties
 	UHMP_AttributeComponent();
 
@@ -30,6 +37,9 @@ protected:
 	float LastDamage;
 
 public:
+
+	UFUNCTION(BlueprintCallable)
+	bool Kill(AActor* InstigatorActor);
 
 	UFUNCTION(BlueprintCallable)
 	bool IsAlive() const;

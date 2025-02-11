@@ -3,11 +3,18 @@
 
 #include "HMP_AttributeComponent.h"
 
+
+
 // Sets default values for this component's properties
 UHMP_AttributeComponent::UHMP_AttributeComponent()
 {
 	Health = 100;
 	MaxHealth = 100;
+}
+
+bool UHMP_AttributeComponent::Kill(AActor* InstigatorActor)
+{
+	return ApplyHealthChange(InstigatorActor, -MaxHealth);
 }
 
 bool UHMP_AttributeComponent::IsAlive() const
@@ -18,6 +25,11 @@ bool UHMP_AttributeComponent::IsAlive() const
 
 bool UHMP_AttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delta)
 {
+	if (!GetOwner()->CanBeDamaged())
+	{
+		return false;
+	}
+	
 	float OldHealth = Health;
 	
 	Health = FMath::Clamp(Health + Delta, 0.0f, MaxHealth);
@@ -48,6 +60,26 @@ float UHMP_AttributeComponent::GetLastDamage() const
 	return LastDamage;
 }
 
+UHMP_AttributeComponent* UHMP_AttributeComponent::GetAttributes(AActor* FromActor)
+{
+	if (FromActor)
+	{
+		return Cast<UHMP_AttributeComponent>(FromActor->GetComponentByClass(UHMP_AttributeComponent::StaticClass()));
+	}
+
+	return nullptr;
+}
+
+bool UHMP_AttributeComponent::IsActorAlive(AActor* Actor)
+{
+	UHMP_AttributeComponent* AttributeComp = GetAttributes(Actor);
+	if (AttributeComp)
+	{
+		return AttributeComp->IsAlive();
+	}
+	
+	return false;
+}
 
 
 

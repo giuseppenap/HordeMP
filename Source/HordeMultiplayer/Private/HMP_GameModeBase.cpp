@@ -20,6 +20,18 @@ void AHMP_GameModeBase::StartPlay()
 	GetWorldTimerManager().SetTimer(TimerHandle_SpawnBots, this, &AHMP_GameModeBase::SpawnBotTimerElapsed, SpawnTimerInterval, true);
 }
 
+void AHMP_GameModeBase::KillAll()
+{
+	for (AHMP_AICharacter* Bot:TActorRange<AHMP_AICharacter>(GetWorld()))
+	{
+		UHMP_AttributeComponent* AttributeComp = UHMP_AttributeComponent::GetAttributes(Bot);
+		if (ensure(AttributeComp) && AttributeComp->IsAlive())
+		{
+			AttributeComp->Kill(this); // @fixme: pass in player? for kill credits?
+		}
+	}
+}
+
 
 void AHMP_GameModeBase::SpawnBotTimerElapsed()
 {
@@ -27,7 +39,7 @@ void AHMP_GameModeBase::SpawnBotTimerElapsed()
 	int32 NrOfAliveBots = 0;
 	for (AHMP_AICharacter* Bot:TActorRange<AHMP_AICharacter>(GetWorld()))
 	{
-		UHMP_AttributeComponent* AttributeComp = Cast<UHMP_AttributeComponent>(Bot->GetComponentByClass(UHMP_AttributeComponent::StaticClass()));
+		UHMP_AttributeComponent* AttributeComp = UHMP_AttributeComponent::GetAttributes(Bot);
 		if (ensure(AttributeComp) && AttributeComp->IsAlive())
 		{
 			NrOfAliveBots++;

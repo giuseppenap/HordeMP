@@ -19,10 +19,16 @@ class HORDEMULTIPLAYER_API UHMP_BTTask_RangedAttack : public UBTTaskNode
 protected:
 
 	UPROPERTY(EditAnywhere, Category = "AI")
+	float MaxBulletSpread;
+	
+	UPROPERTY(EditAnywhere, Category = "AI")
 	TSubclassOf<AActor> ProjectileClass;
 
 	UPROPERTY(VisibleAnywhere, Category = "AI")
 	FName ProjectileSocket;
 
+public:
+
+	UHMP_BTTask_RangedAttack();
 	
 };

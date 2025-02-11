@@ -5,9 +5,12 @@
 #include "CoreMinimal.h"
 #include "HMP_AttributeComponent.h"
 #include "GameFramework/Character.h"
+#include "UI/HMP_WorldUserWidget.h"
 #include "HMP_AICharacter.generated.h"
 
 class UPawnSensingComponent;
+class UUserWidget;
+class UHMP_AttributeComponent;
 
 UCLASS()
 class HORDEMULTIPLAYER_API AHMP_AICharacter : public ACharacter
@@ -19,6 +22,15 @@ public:
 	AHMP_AICharacter();
 
 protected:
+
+	UPROPERTY(BlueprintReadOnly)
+	UHMP_WorldUserWidget* ActiveHealthBar;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> HealthBarWidgetClass;
+
+	UPROPERTY(VisibleAnywhere, Category = "Effects")
+	FName TimeToHitParameter;
 
 	UFUNCTION()
 	void SetTargetActor(AActor* NewTarget);

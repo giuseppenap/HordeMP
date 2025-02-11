@@ -3,9 +3,15 @@
 
 #include "AI/HMP_BTTask_RangedAttack.h"
 #include "AIController.h"
+#include "HMP_AttributeComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Character.h"
 
+
+UHMP_BTTask_RangedAttack::UHMP_BTTask_RangedAttack()
+{
+	MaxBulletSpread = 2.0f;
+}
 
 EBTNodeResult::Type UHMP_BTTask_RangedAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
@@ -26,8 +32,16 @@ EBTNodeResult::Type UHMP_BTTask_RangedAttack::ExecuteTask(UBehaviorTreeComponent
 			return EBTNodeResult::Failed;
 		}
 
+		if (!UHMP_AttributeComponent::IsActorAlive(TargetActor))
+		{
+			return EBTNodeResult::Failed;
+		}
+
 		FVector Direction = TargetActor->GetActorLocation() - MuzzleLocation;
 		FRotator MuzzleRotation = Direction.Rotation();
+
+		MuzzleRotation.Pitch += FMath::RandRange(0.0f, MaxBulletSpread);
+		MuzzleRotation.Yaw += FMath::RandRange(-MaxBulletSpread, MaxBulletSpread);
 
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -40,3 +54,5 @@ EBTNodeResult::Type UHMP_BTTask_RangedAttack::ExecuteTask(UBehaviorTreeComponent
 
 	return EBTNodeResult::Failed;
 }
+
+

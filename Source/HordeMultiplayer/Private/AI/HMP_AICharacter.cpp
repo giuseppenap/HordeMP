@@ -7,7 +7,10 @@
 #include "AI/HMP_AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "HMP_AttributeComponent.h"
+#include "Blueprint/UserWidget.h"
+#include "Components/CapsuleComponent.h"
 #include "Perception/PawnSensingComponent.h"
+#include "UI/HMP_WorldUserWidget.h"
 
 
 // Sets default values
@@ -19,6 +22,8 @@ AHMP_AICharacter::AHMP_AICharacter()
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	AttributeComp = CreateDefaultSubobject<UHMP_AttributeComponent>("AttributeComp");
+
+	TimeToHitParameter = "HitFlashTime";
 	
 }
 
@@ -42,26 +47,40 @@ void AHMP_AICharacter::OnHealthChangedImplementation(AActor* InstigatorActor, UH
 		if (InstigatorActor != this)
 		{
 			SetTargetActor(InstigatorActor);
-			if (NewHealth <= 0.0f)
+		}
+
+
+		if (ActiveHealthBar == nullptr)
+		{
+			ActiveHealthBar = CreateWidget<UHMP_WorldUserWidget>(GetWorld(), HealthBarWidgetClass);
+			if (ActiveHealthBar)
 			{
-				// stop BT
-				AAIController* AIC = Cast<AAIController>(GetController());
-				if (AIC)
-				{
-					AIC->GetBrainComponent()->StopLogic("Killed");
-				}
-			
-				// ragdoll
-				GetMesh()->SetAllBodiesSimulatePhysics(true);
-				GetMesh()->SetCollisionProfileName("Ragdoll");
-			
-				// set lifespan
-				SetLifeSpan(10.0f);
+				ActiveHealthBar->AttachedActor = this;
+				ActiveHealthBar->AddToViewport();
+			}
+		}
+		
+		
+		GetMesh()->SetScalarParameterValueOnMaterials(TimeToHitParameter, GetWorld()->GetTimeSeconds());
+
+		if (NewHealth <= 0.0f)
+		{
+			// stop BT
+			AAIController* AIC = Cast<AAIController>(GetController());
+			if (AIC)
+			{
+				AIC->GetBrainComponent()->StopLogic("Killed");
 			}
 
-			USkeletalMeshComponent* SKMesh = GetMesh();
-			SKMesh->SetScalarParameterValueOnMaterials("HitFlashTime", GetWorld()->GetTimeSeconds());
+			// ragdoll
+			GetMesh()->SetAllBodiesSimulatePhysics(true);
+			GetMesh()->SetCollisionProfileName("Ragdoll");
+			GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+			// set lifespan
+			SetLifeSpan(10.0f);
 		}
+
 	}
 }
 
@@ -78,5 +97,5 @@ void AHMP_AICharacter::OnPawnSeen(APawn* Pawn)
 {
 	SetTargetActor(Pawn);
 
-	DrawDebugString(GetWorld(), GetActorLocation(), "Player SPOTTED", nullptr, FColor::White, 4.0f, true);
+	//DrawDebugString(GetWorld(), GetActorLocation(), "Player SPOTTED", nullptr, FColor::White, 4.0f, true);
 }

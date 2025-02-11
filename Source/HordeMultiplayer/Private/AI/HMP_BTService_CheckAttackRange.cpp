@@ -11,7 +11,7 @@ void UHMP_BTService_CheckAttackRange::TickNode(UBehaviorTreeComponent& OwnerComp
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
-	// Check distance between AI Pawn and TargetActor
+	// Check if Health is below treshold 
 
 	UBlackboardComponent* BlackboardComp = OwnerComp.GetBlackboardComponent();
 	if (ensure(BlackboardComp))

@@ -7,6 +7,7 @@
 #include "HMP_AttributeComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Camera/CameraComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -76,7 +77,12 @@ void AHMP_PlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 }
 
-void AHMP_PlayerCharacter::MoveForward(float Value)
+ void AHMP_PlayerCharacter::HealSelf(float Amount /* = 100 */)
+ {
+	AttributeComp->ApplyHealthChange(this, Amount);
+ }
+
+ void AHMP_PlayerCharacter::MoveForward(float Value)
 {
 	FRotator ControlRot = GetControlRotation();
 	ControlRot.Pitch = 0.0f;
@@ -164,6 +170,8 @@ void AHMP_PlayerCharacter::SpecialAttack()
 	{
 		APlayerController* PC = Cast<APlayerController>(GetController());
 		PC->ClientStartCameraShake(DeathCameraShake);
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		DisableInput(PC);
 	}
  }
