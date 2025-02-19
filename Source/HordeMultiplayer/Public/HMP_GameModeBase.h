@@ -24,26 +24,45 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	TSubclassOf<AActor> MinionClass;
-
+	
 	UPROPERTY(EditDefaultsOnly, Category= "AI")
 	UEnvQuery* SpawnBotQuery;
 
 	UPROPERTY(EditDefaultsOnly, Category= "AI")
 	UCurveFloat* DifficultyCurve;
 	
-
 	FTimerHandle TimerHandle_SpawnBots;
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	float SpawnTimerInterval;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Pickups")
+	UEnvQuery* SpawnPickupQuery;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Pickups")
+	TArray<TSubclassOf<AActor>> PickupClasses;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Pickups")
+	float RequiredPowerupDistance;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Pickups")
+	int32 DesiredPowerupCount;
 	
 	UFUNCTION()
 	void SpawnBotTimerElapsed();
 
 	UFUNCTION()
-	void OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus);
+	void OnSpawnBotQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus);
+
+	UFUNCTION()
+	void OnPickupSpawnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance, EEnvQueryStatus::Type QueryStatus);
+	
+	UFUNCTION()
+	void RespawnPlayerElapsed(AController* Controller);
 
 public:
+
+	virtual void OnActorKilled(AActor* VictimActor, AActor* Killer);
 	
 	AHMP_GameModeBase();
 

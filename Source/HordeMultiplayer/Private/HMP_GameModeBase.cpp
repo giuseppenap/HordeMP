@@ -4,8 +4,15 @@
 #include "HMP_GameModeBase.h"
 
 #include "EngineUtils.h"
+#include "HMP_PlayerCharacter.h"
+#include "HMP_PlayerState.h"
 #include "AI/HMP_AICharacter.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
+
+
+static TAutoConsoleVariable<bool> CVarSpawnBots(TEXT("hmp.SpawnBots"), true, TEXT("Enable spawning of bots via timer."), ECVF_Cheat);
+
+
 
 
 AHMP_GameModeBase::AHMP_GameModeBase()
@@ -18,6 +25,15 @@ void AHMP_GameModeBase::StartPlay()
 	Super::StartPlay();
 
 	GetWorldTimerManager().SetTimer(TimerHandle_SpawnBots, this, &AHMP_GameModeBase::SpawnBotTimerElapsed, SpawnTimerInterval, true);
+
+	if (ensure(PickupClasses.Num() > 0))
+	{
+		UEnvQueryInstanceBlueprintWrapper* QueryInstance = UEnvQueryManager::RunEQSQuery(this, SpawnPickupQuery, this, EEnvQueryRunMode::AllMatching, nullptr);
+		if (ensure(QueryInstance))
+		{
+			QueryInstance->GetOnQueryFinishedEvent().AddDynamic(this, &AHMP_GameModeBase::OnPickupSpawnQueryCompleted);
+		}
+	}
 }
 
 void AHMP_GameModeBase::KillAll()
@@ -35,6 +51,11 @@ void AHMP_GameModeBase::KillAll()
 
 void AHMP_GameModeBase::SpawnBotTimerElapsed()
 {
+	if (!CVarSpawnBots.GetValueOnGameThread())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Bot spawning disabled via cvar `CVarSpawnBot`."));
+		return;
+	}
 
 	int32 NrOfAliveBots = 0;
 	for (AHMP_AICharacter* Bot:TActorRange<AHMP_AICharacter>(GetWorld()))
@@ -66,11 +87,11 @@ void AHMP_GameModeBase::SpawnBotTimerElapsed()
 
 	if (ensure(QueryInstance))
 	{
-	QueryInstance->GetOnQueryFinishedEvent().AddDynamic(this, &AHMP_GameModeBase::OnQueryCompleted);
+	QueryInstance->GetOnQueryFinishedEvent().AddDynamic(this, &AHMP_GameModeBase::OnSpawnBotQueryCompleted);
 	}
 }
 
-void AHMP_GameModeBase::OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance,
+void AHMP_GameModeBase::OnSpawnBotQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance,
 	EEnvQueryStatus::Type QueryStatus)
 {
 	if (QueryStatus != EEnvQueryStatus::Success)
@@ -88,5 +109,97 @@ void AHMP_GameModeBase::OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* Quer
 
 		DrawDebugSphere(GetWorld(), Locations[0], 50.0f, 30, FColor::Blue, false, 60.0f	);
 	}
+}
+
+void AHMP_GameModeBase::OnPickupSpawnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryInstance,
+	EEnvQueryStatus::Type QueryStatus)
+{
+	if (QueryStatus != EEnvQueryStatus::Success)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Spawn Pickup Query EQS Failed!"));
+		return;
+	}
+
+	TArray<FVector> Locations = QueryInstance->GetResultsAsLocations();
+
+	TArray<FVector> UsedLocations;
+
+	int32 SpawnCounter = 0;
+
+	while (SpawnCounter < DesiredPowerupCount && Locations.Num() > 0)
+	{
+		int32 RandomLocationIndex = FMath::RandRange(0, Locations.Num() - 1);
+
+		FVector PickedLocation = Locations[RandomLocationIndex];
+
+		Locations.RemoveAt(RandomLocationIndex);
+
+		bool bValidLocations = true;
+
+		for (FVector OtherLocation : UsedLocations)
+		{
+			float DistanceTo = (PickedLocation - OtherLocation).Size();
+
+			if (DistanceTo < RequiredPowerupDistance)
+			{
+				DrawDebugSphere(GetWorld(), PickedLocation, 50.0f, 20, FColor::Red, false, 10.0f);
+				bValidLocations = false;
+				UE_LOG(LogTemp, Log, TEXT("Distance too short to spawn pickup."));
+				break;
+				
+			}
+		}
+		if (bValidLocations)
+		{
+			continue;
+		}
+
+		int32 RandomClassIndex = FMath::RandRange(0, PickupClasses.Num() - 1);
+		TSubclassOf<AActor> RandomPickupClass = PickupClasses[RandomClassIndex];
+
+		GetWorld()->SpawnActor<AActor>(RandomPickupClass, PickedLocation, FRotator::ZeroRotator);
+
+		UsedLocations.Add(PickedLocation);
+		SpawnCounter++;
+		UE_LOG(LogTemp, Log, TEXT("Found %i Pickups."), SpawnCounter);
+		
+	}
+}
+
+void AHMP_GameModeBase::RespawnPlayerElapsed(AController* Controller)
+{
+	if (ensure(Controller))
+	{
+		Controller->UnPossess();
+		
+		RestartPlayer(Controller);
+		}
+}
+
+void AHMP_GameModeBase::OnActorKilled(AActor* VictimActor, AActor* Killer)
+{
+	AHMP_PlayerCharacter* Player = Cast<AHMP_PlayerCharacter>(VictimActor);
+	if (Player)
+	{
+		FTimerHandle TimerHandle_RespawnDelay;
+
+		FTimerDelegate Delegate;
+		Delegate.BindUFunction(this, "RespawnPlayerElapsed", Player->GetController());
+
+		float RespawnDelay = 2.0f;
+		GetWorldTimerManager().SetTimer(TimerHandle_RespawnDelay, Delegate, RespawnDelay, false);
+	}
+
+
+	AHMP_PlayerCharacter* KillingPlayer = Cast<AHMP_PlayerCharacter>(Killer);
+	if (KillingPlayer)
+	{
+		if (AHMP_PlayerState* PS = KillingPlayer->GetPlayerState<AHMP_PlayerState>())
+		{
+			PS->AddCredits(50.0f);
+		}
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("OnActorKilled: Victim: %s, Killer: %s"), *GetNameSafe(VictimActor), *GetNameSafe(Killer));
 }
 
