@@ -3,7 +3,10 @@
 
 #include "HMP_AttributeComponent.h"
 
+#include "HMP_GameModeBase.h"
 
+
+static TAutoConsoleVariable<float> CVarDamageMultiplier(TEXT("hmp.DamageMultiplier"), 1.0f, TEXT("Global Damage Modifier for Attribute Component."), ECVF_Cheat);
 
 // Sets default values for this component's properties
 UHMP_AttributeComponent::UHMP_AttributeComponent()
@@ -25,9 +28,16 @@ bool UHMP_AttributeComponent::IsAlive() const
 
 bool UHMP_AttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float Delta)
 {
-	if (!GetOwner()->CanBeDamaged())
+	if (!GetOwner()->CanBeDamaged() && Delta <= 0.0f)
 	{
 		return false;
+	}
+
+	if (Delta <= 0.0f)
+	{
+		float DamageMultiplier = CVarDamageMultiplier.GetValueOnGameThread();
+
+		Delta *= DamageMultiplier;
 	}
 	
 	float OldHealth = Health;
@@ -37,6 +47,15 @@ bool UHMP_AttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float D
 	float ActualDelta = Health - OldHealth;
 	LastDamage = ActualDelta;
 	OnHealthChanged.Broadcast(InstigatorActor, this, Health, ActualDelta);
+
+	if (ActualDelta < 0.0f && Health == 0.0f)
+	{
+		AHMP_GameModeBase* GM = GetWorld()->GetAuthGameMode<AHMP_GameModeBase>();
+		if (GM)
+		{
+			GM->OnActorKilled(GetOwner(), InstigatorActor);
+		}
+	}
     return ActualDelta != 0;
 }
 

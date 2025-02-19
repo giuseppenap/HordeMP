@@ -50,6 +50,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Effects")
 	TSubclassOf<UCameraShakeBase> ImpactCameraShake;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	USoundBase* EnemyHitSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	USoundBase* EnemyKilledSound;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Config")
 	float Damage;
 

@@ -35,7 +35,7 @@ protected:
 	UFUNCTION()
 	void SetTargetActor(AActor* NewTarget);
 	
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	UHMP_AttributeComponent* AttributeComp;
 
 	virtual void PostInitializeComponents() override;

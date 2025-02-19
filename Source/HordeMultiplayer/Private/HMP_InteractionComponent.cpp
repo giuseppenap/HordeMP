@@ -8,6 +8,7 @@
 #include "Camera/CameraComponent.h"
 
 
+static TAutoConsoleVariable<bool> CVarDebutDrawInteraction(TEXT("hmp.InteractionDebuDraw"), false, TEXT("Enable Debug Lines for Interact Component."), ECVF_Cheat);
 
 
 // Sets default values for this component's properties
@@ -41,6 +42,8 @@ void UHMP_InteractionComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 
 void UHMP_InteractionComponent::PrimaryInteract()
 {
+	bool bDebugDraw = CVarDebutDrawInteraction.GetValueOnGameThread();
+	
 	FCollisionObjectQueryParams ObjectQueryParams;
 	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
 
@@ -77,16 +80,22 @@ void UHMP_InteractionComponent::PrimaryInteract()
 
 	if (bBlockingHit)
 	{
+		if (bDebugDraw)
+		{
+			DrawDebugSphere(GetWorld(), Hit.ImpactPoint, 30.0f, 32, LineColor, false, 2.0f);
+		}
 		TraceEnd = Hit.ImpactPoint;
 		AActor* HitActor = Hit.GetActor();
 		if (HitActor && HitActor->Implements<UHMP_Gameplay_Interface>())
 		{
 			APawn* MyPawn = Cast<APawn>(MyOwner);
 			IHMP_Gameplay_Interface::Execute_Interact(HitActor, MyPawn);
-			DrawDebugSphere(GetWorld(), Hit.ImpactPoint, 30.0f, 32, LineColor, false, 2.0f);
 		}
 	}
 
 	// Draw Debug Line
+	if (bDebugDraw)
+	{
 	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, LineColor, false, 2.0f, 0, 2.0f);
+	}
 }

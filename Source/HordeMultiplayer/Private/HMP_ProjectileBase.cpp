@@ -4,6 +4,7 @@
 #include "HMP_ProjectileBase.h"
 
 #include "HMP_AttributeComponent.h"
+#include "HMP_GameplayFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Components/AudioComponent.h"
@@ -59,19 +60,24 @@ void AHMP_ProjectileBase::OnActorOverlap(UPrimitiveComponent* OverlappedComponen
 {
 	if (OtherActor && OtherActor != GetInstigator())
 	{
-		UHMP_AttributeComponent* AttributeComp = Cast<UHMP_AttributeComponent>(OtherActor->GetComponentByClass(UHMP_AttributeComponent::StaticClass()));
-		if (AttributeComp)
+		if (UHMP_GameplayFunctionLibrary::ApplyDirectionalDamage(GetInstigator(), OtherActor, Damage, SweepResult))
 		{
-			AttributeComp->ApplyHealthChange(GetInstigator(), -Damage);
 			Explode_Implementation();
-			AudioComp->FadeOut(0.6f,1);
-			UGameplayStatics::PlaySoundAtLocation(this, HitSoundBase, GetActorLocation(), GetActorRotation(), 0.1f, 1.0f, 0.0f, AttenuationProjectile);
-			APlayerController* PC = UGameplayStatics::GetPlayerController(GetInstigator(), 0);
+			// @Fixme: 
+			/*APlayerController* PC = UGameplayStatics::GetPlayerController(GetInstigator(), 0);
 			if (PC && ImpactCameraShake)
 			{
 				PC->ClientStartCameraShake(ImpactCameraShake);	
 			}
-			
+			UHMP_AttributeComponent* AttributeComp = UHMP_AttributeComponent::GetAttributes(OtherActor);
+			if (AttributeComp->IsAlive())
+			{
+				UGameplayStatics::PlaySoundAtLocation(this, EnemyKilledSound, GetActorLocation(), GetActorRotation(), 0.1f, 1.0f, 0.0f, AttenuationProjectile);
+			}
+			UGameplayStatics::PlaySoundAtLocation(this, EnemyHitSound, GetActorLocation(), GetActorRotation(), 0.1f, 1.0f, 0.0f, AttenuationProjectile);
+			Explode_Implementation();
+			AudioComp->FadeOut(0.6f,1);
+			UGameplayStatics::PlaySoundAtLocation(this, HitSoundBase, GetActorLocation(), GetActorRotation(), 0.1f, 1.0f, 0.0f, AttenuationProjectile);*/
 		}
 	}
 }
