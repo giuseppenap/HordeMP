@@ -16,6 +16,12 @@ public:
 
 	void PrimaryInteract();
 
+protected:
+
+	UPROPERTY(EditDefaultsOnly, Category = Config)
+	float MaxInteractionDistance;
+	
+
 public:	
 	// Sets default values for this component's properties
 	UHMP_InteractionComponent();

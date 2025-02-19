@@ -18,6 +18,11 @@ static TAutoConsoleVariable<bool> CVarSpawnBots(TEXT("hmp.SpawnBots"), true, TEX
 AHMP_GameModeBase::AHMP_GameModeBase()
 {
 	SpawnTimerInterval = 2.0f;
+
+	DesiredPowerupCount = 10;
+	RequiredPowerupDistance = 2000;
+
+	PlayerStateClass = AHMP_PlayerCharacter::StaticClass();
 }
 
 void AHMP_GameModeBase::StartPlay()
@@ -149,7 +154,7 @@ void AHMP_GameModeBase::OnPickupSpawnQueryCompleted(UEnvQueryInstanceBlueprintWr
 				
 			}
 		}
-		if (bValidLocations)
+		if (!bValidLocations)
 		{
 			continue;
 		}

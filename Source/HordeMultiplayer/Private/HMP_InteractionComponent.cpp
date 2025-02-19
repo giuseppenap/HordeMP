@@ -18,6 +18,8 @@ UHMP_InteractionComponent::UHMP_InteractionComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
+	MaxInteractionDistance = 1000;
+
 	// ...
 }
 
@@ -65,7 +67,7 @@ void UHMP_InteractionComponent::PrimaryInteract()
 
 	// Line trace forward from the camera
 	FVector TraceStart = CameraLocation;
-	FVector TraceEnd = TraceStart + (CameraRotation.Vector() * 5000);
+	FVector TraceEnd = TraceStart + (CameraRotation.Vector() * MaxInteractionDistance);
 
 	// Perform the trace
 	FHitResult Hit;
