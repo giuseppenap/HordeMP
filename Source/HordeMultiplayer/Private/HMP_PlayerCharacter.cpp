@@ -5,12 +5,11 @@
 
 #include "HMP_InteractionComponent.h"
 #include "HMP_AttributeComponent.h"
-#include "NiagaraFunctionLibrary.h"
+#include "HMP_ActionComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Kismet/GameplayStatics.h"
 
  // Sets default values
 AHMP_PlayerCharacter::AHMP_PlayerCharacter()
@@ -27,6 +26,8 @@ AHMP_PlayerCharacter::AHMP_PlayerCharacter()
 	InteractionComp = CreateDefaultSubobject<UHMP_InteractionComponent>("InteractionComponent");
 
 	AttributeComp = CreateDefaultSubobject<UHMP_AttributeComponent>("AttributeComponent");
+
+	ActionComp = CreateDefaultSubobject<UHMP_ActionComponent>("ActionComponent");
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
@@ -69,6 +70,9 @@ void AHMP_PlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AHMP_PlayerCharacter::Jump);
 
+	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AHMP_PlayerCharacter::SprintStart);
+	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AHMP_PlayerCharacter::SprintStop);
+
 	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &AHMP_PlayerCharacter::PrimaryAttack);
 	PlayerInputComponent->BindAction("PrimaryInteract", IE_Pressed, this, &AHMP_PlayerCharacter::PrimaryInteract);
 	PlayerInputComponent->BindAction("Special", IE_Pressed, this, &AHMP_PlayerCharacter::SpecialAttack);
@@ -103,28 +107,34 @@ void AHMP_PlayerCharacter::MoveRight(float Value)
 	AddMovementInput(RightVector, Value);
 }
 
+ void AHMP_PlayerCharacter::SprintStart()
+ {
+	ActionComp->StartActionByName(this, "Sprint");
+ }
+
+ void AHMP_PlayerCharacter::SprintStop()
+ {
+	ActionComp->StopActionByName(this, "Sprint");
+ }
+
  void AHMP_PlayerCharacter::PrimaryAttack()
  {
-	PlayAnimMontage(AttackAnim);
-	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &AHMP_PlayerCharacter::PrimaryAttack_TimeElapsed, 0.17f);
+	ActionComp->StartActionByName(this, "PrimaryAttack");
  }
 
 void AHMP_PlayerCharacter::SpecialAttack()
  {
-	PlayAnimMontage(AttackAnim);
-	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &AHMP_PlayerCharacter::SpecialAttack_TimeElapsed, 0.17f);
+	ActionComp->StartActionByName(this, "SpecialAttack");
  }
 
  void AHMP_PlayerCharacter::Dash()
  {
-	PlayAnimMontage(AttackAnim);
-	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &AHMP_PlayerCharacter::Dash_TimeElapsed, 0.17f);
+	ActionComp->StartActionByName(this, "Dash");
  }
 
  void AHMP_PlayerCharacter::AlternateFire()
  {
-	PlayAnimMontage(AttackAnim);
-	GetWorldTimerManager().SetTimer(TimerHandle_PrimaryAttack, this, &AHMP_PlayerCharacter::AlternateFire_TimeElapsed, 0.17f);
+	ActionComp->StartActionByName(this, "AlternateFire");
  }
 
  void AHMP_PlayerCharacter::PrimaryInteract()
@@ -133,33 +143,13 @@ void AHMP_PlayerCharacter::SpecialAttack()
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Player Interact"));
  }
 
- void AHMP_PlayerCharacter::PrimaryAttack_TimeElapsed()
- {
-	SpawnProjectile(ProjectileClass);
-	//UE_LOG(LogTemp, Warning, TEXT("Player Attack Finished"));
- }
-
- void AHMP_PlayerCharacter::SpecialAttack_TimeElapsed()
- {
-	SpawnProjectile(SpecialProjectileClass);
-	//UE_LOG(LogTemp, Warning, TEXT("Player Special Attack Finished"));
- }
-
- void AHMP_PlayerCharacter::Dash_TimeElapsed()
- {
-	SpawnProjectile(DashProjectileClass);
-	//UE_LOG(LogTemp, Warning, TEXT("Player Dash Attack Finished"));
- }
-
- void AHMP_PlayerCharacter::AlternateFire_TimeElapsed()
- {
-	SpawnProjectile(AlternateProjectileClass);
-	//UE_LOG(LogTemp, Warning, TEXT("Player Alternate Attack Finished"));
- }
-
  void AHMP_PlayerCharacter::OnHealthChanged(AActor* InstigatorActor, UHMP_AttributeComponent* OwningComp,
 	 float NewHealth, float Delta)
  {
+	if (Delta > 0.0f)
+	{
+		//GetMesh()->SetVectorParameterValueOnMaterials(HealColor, )
+	}
 	if (Delta < 0.0f)
 	{
 		GetMesh()->SetScalarParameterValueOnMaterials("TimeToHit", GetWorld()->GetTimeSeconds());
@@ -176,48 +166,9 @@ void AHMP_PlayerCharacter::SpecialAttack()
 	}
  }
 
-
- void AHMP_PlayerCharacter::SpawnProjectile(TSubclassOf<AActor> ClassToSpawn)
+ FVector AHMP_PlayerCharacter::GetPawnViewLocation() const
  {
-	if (ensureAlways(ClassToSpawn))
-	{
-		FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
-		
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-		SpawnParams.Instigator = this;
-
-		FCollisionShape Shape;
-		Shape.SetSphere(20.0f);
-
-		FCollisionQueryParams Params;
-		Params.AddIgnoredActor(this);
-
-		FCollisionObjectQueryParams ObjParams;
-		ObjParams.AddObjectTypesToQuery(ECC_WorldDynamic);
-		ObjParams.AddObjectTypesToQuery(ECC_Pawn);
-		ObjParams.AddObjectTypesToQuery(ECC_WorldStatic);
-
-		FVector TraceStart = CameraComp->GetComponentLocation();
-
-		FVector TraceEnd = CameraComp->GetComponentLocation() + (GetControlRotation().Vector() * 5000);
-
-		FHitResult Hit;
-
-		if (GetWorld()->SweepSingleByObjectType(Hit, TraceStart, TraceEnd, FQuat::Identity, ObjParams, Shape, Params))
-		{
-			TraceEnd = Hit.ImpactPoint;
-		}
-
-		FRotator ProjRotation = FRotationMatrix::MakeFromX(TraceEnd - HandLocation).Rotator();
-
-		FTransform SpawnTM = FTransform(ProjRotation, HandLocation);
-		UNiagaraFunctionLibrary::SpawnSystemAttached(MuzzleEffect, GetMesh(),"Muzzle_01", FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget, true);
-		GetWorld()->SpawnActor<AActor>(ClassToSpawn, SpawnTM, SpawnParams);
-
-		//DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Cyan, false, 2.0f, 0,2.0f);
-	}
+	 return CameraComp->GetComponentLocation();
  }
 
 

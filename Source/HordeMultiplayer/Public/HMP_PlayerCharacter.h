@@ -3,15 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "HMP_ActionComponent.h"
 #include "HMP_AttributeComponent.h"
-#include "HMP_BlackHoleProjectile.h"
 #include "GameFramework/Character.h"
 #include "HMP_PlayerCharacter.generated.h"
 
 class UCameraComponent;
 class USpringArmComponent;
 class UHMP_InteractionComponent;
-class UAnimMontage;
+class UHMP_ActionComponent;
 
 UCLASS()
 class HORDEMULTIPLAYER_API AHMP_PlayerCharacter : public ACharacter
@@ -20,26 +20,6 @@ class HORDEMULTIPLAYER_API AHMP_PlayerCharacter : public ACharacter
 
 protected:
 	
-	UPROPERTY(EditAnywhere, Category = Attack)
-	TSubclassOf<AActor> ProjectileClass;
-
-	UPROPERTY(EditAnywhere, Category = Attack)
-	TSubclassOf<AActor> SpecialProjectileClass;
-
-	UPROPERTY(EditAnywhere, Category = Attack)
-	TSubclassOf<AActor> DashProjectileClass;
-
-	UPROPERTY(EditAnywhere, Category = Attack)
-	TSubclassOf<AActor> AlternateProjectileClass;
-	
-	UPROPERTY(EditAnywhere, Category = Attack)
-	UAnimMontage* AttackAnim;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	UHMP_AttributeComponent* AttributeComp;
-	
-	UPROPERTY(EditAnywhere, Category = Attack)
-	UNiagaraSystem* MuzzleEffect;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Effects")
 	TSubclassOf<UCameraShakeBase> ImpactCameraShake;
@@ -47,7 +27,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Effects")
 	TSubclassOf<UCameraShakeBase> DeathCameraShake;
 
-	FTimerHandle TimerHandle_PrimaryAttack;
 
 public:
 	// Sets default values for this character's properties
@@ -63,10 +42,14 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	UHMP_InteractionComponent* InteractionComp;
-
-	UPROPERTY(VisibleAnywhere)
-	FName ProjSocketLocation;
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UHMP_AttributeComponent* AttributeComp;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UHMP_ActionComponent* ActionComp;
+
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -75,6 +58,12 @@ protected:
 
 	UFUNCTION()
 	void MoveRight(float Value);
+
+	UFUNCTION()
+	void SprintStart();
+
+	UFUNCTION()
+	void SprintStop();
 
 	UFUNCTION()
 	void PrimaryAttack();
@@ -91,33 +80,20 @@ protected:
 	UFUNCTION()
 	void AlternateFire();
 	
-	UFUNCTION()
-	void PrimaryAttack_TimeElapsed();
-
-	UFUNCTION()
-	void SpecialAttack_TimeElapsed();
-
-	UFUNCTION()
-	void Dash_TimeElapsed();
-
-	UFUNCTION()
-	void AlternateFire_TimeElapsed();
 	
 	UFUNCTION()
 	void OnHealthChanged(AActor* InstigatorActor, UHMP_AttributeComponent* OwningComp, float NewHealth, float Delta);
-
-
-	UFUNCTION()
-	void SpawnProjectile(TSubclassOf<AActor> ClassToSpawn);
 	
-public:	
-	// Called every frame
+	
+	virtual FVector GetPawnViewLocation() const override;
+	
+public:
+	
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void PostInitializeComponents() override;
 
 	
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION(Exec)
