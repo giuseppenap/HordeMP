@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "HMP_Action.h"
+#include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
 #include "HMP_ActionComponent.generated.h"
 
@@ -17,8 +17,14 @@ class HORDEMULTIPLAYER_API UHMP_ActionComponent : public UActorComponent
 
 public:
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tags")
+	FGameplayTagContainer ActiveGameplayTags;
+
 	UFUNCTION(BlueprintCallable, Category = "Action")
-	void AddAction(TSubclassOf<UHMP_Action> ActionClass);
+	void AddAction(AActor* Instigator, TSubclassOf<UHMP_Action> ActionClass);
+
+	UFUNCTION(BlueprintCallable, Category = "Action")
+	void RemoveAction(UHMP_Action* ActionToRemove);
 
 	UFUNCTION(BlueprintCallable, Category = "Action")
 	bool StartActionByName(AActor* Instigator, FName ActionName);

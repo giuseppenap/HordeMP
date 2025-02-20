@@ -3,6 +3,7 @@
 
 #include "HMP_ProjectileBase.h"
 
+#include "HMP_ActionComponent.h"
 #include "HMP_AttributeComponent.h"
 #include "HMP_GameplayFunctionLibrary.h"
 #include "NiagaraComponent.h"
@@ -60,24 +61,26 @@ void AHMP_ProjectileBase::OnActorOverlap(UPrimitiveComponent* OverlappedComponen
 {
 	if (OtherActor && OtherActor != GetInstigator())
 	{
+
+		UHMP_ActionComponent* ActionComp = Cast<UHMP_ActionComponent>(OtherActor->GetComponentByClass(UHMP_ActionComponent::StaticClass()));
+
+		if (ActionComp && ActionComp->ActiveGameplayTags.HasTag(ParryTag))
+		{
+			MovementComp->Velocity = -MovementComp->Velocity;
+
+			SetInstigator(Cast<APawn>(OtherActor));
+			return;
+		}
+
+		// Apply Damage & Impulse
 		if (UHMP_GameplayFunctionLibrary::ApplyDirectionalDamage(GetInstigator(), OtherActor, Damage, SweepResult))
 		{
 			Explode_Implementation();
-			// @Fixme: 
-			/*APlayerController* PC = UGameplayStatics::GetPlayerController(GetInstigator(), 0);
-			if (PC && ImpactCameraShake)
+
+			if (ActionComp && EffectActionClass)
 			{
-				PC->ClientStartCameraShake(ImpactCameraShake);	
+				ActionComp->AddAction(GetInstigator(), EffectActionClass);
 			}
-			UHMP_AttributeComponent* AttributeComp = UHMP_AttributeComponent::GetAttributes(OtherActor);
-			if (AttributeComp->IsAlive())
-			{
-				UGameplayStatics::PlaySoundAtLocation(this, EnemyKilledSound, GetActorLocation(), GetActorRotation(), 0.1f, 1.0f, 0.0f, AttenuationProjectile);
-			}
-			UGameplayStatics::PlaySoundAtLocation(this, EnemyHitSound, GetActorLocation(), GetActorRotation(), 0.1f, 1.0f, 0.0f, AttenuationProjectile);
-			Explode_Implementation();
-			AudioComp->FadeOut(0.6f,1);
-			UGameplayStatics::PlaySoundAtLocation(this, HitSoundBase, GetActorLocation(), GetActorRotation(), 0.1f, 1.0f, 0.0f, AttenuationProjectile);*/
 		}
 	}
 }
@@ -99,7 +102,7 @@ void AHMP_ProjectileBase::Explode_Implementation()
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactVFX, GetActorLocation());
 		AudioComp->FadeOut(0.6f,1);
 		UGameplayStatics::PlaySoundAtLocation(this, HitSoundBase, GetActorLocation(), GetActorRotation(), 0.1f, 1.0f, 0.0f, AttenuationProjectile);
-
+		
 		Destroy();
 	}
 }

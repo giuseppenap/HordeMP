@@ -11,6 +11,7 @@
 class UPawnSensingComponent;
 class UUserWidget;
 class UHMP_AttributeComponent;
+class UHMP_ActionComponent;
 
 UCLASS()
 class HORDEMULTIPLAYER_API AHMP_AICharacter : public ACharacter
@@ -35,8 +36,11 @@ protected:
 	UFUNCTION()
 	void SetTargetActor(AActor* NewTarget);
 	
-	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category="Components")
 	UHMP_AttributeComponent* AttributeComp;
+
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category="Components")
+	UHMP_ActionComponent* ActionComp;
 
 	virtual void PostInitializeComponents() override;
 

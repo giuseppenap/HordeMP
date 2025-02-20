@@ -23,6 +23,8 @@ AHMP_GameModeBase::AHMP_GameModeBase()
 	RequiredPowerupDistance = 2000;
 
 	PlayerStateClass = AHMP_PlayerCharacter::StaticClass();
+
+	CreditsToGrantOnKill = 500.0f;
 }
 
 void AHMP_GameModeBase::StartPlay()
@@ -48,7 +50,14 @@ void AHMP_GameModeBase::KillAll()
 		UHMP_AttributeComponent* AttributeComp = UHMP_AttributeComponent::GetAttributes(Bot);
 		if (ensure(AttributeComp) && AttributeComp->IsAlive())
 		{
-			AttributeComp->Kill(this); // @fixme: pass in player? for kill credits?
+			// @fixme: pass in player? for kill credits?
+			for (AHMP_PlayerCharacter* Player:TActorRange<AHMP_PlayerCharacter>(GetWorld()))
+			{
+				if (Player)
+				{
+				AttributeComp->Kill(Player);
+				}
+			}
 		}
 	}
 }
@@ -201,7 +210,7 @@ void AHMP_GameModeBase::OnActorKilled(AActor* VictimActor, AActor* Killer)
 	{
 		if (AHMP_PlayerState* PS = KillingPlayer->GetPlayerState<AHMP_PlayerState>())
 		{
-			PS->AddCredits(50.0f);
+			PS->AddCredits(CreditsToGrantOnKill);
 		}
 	}
 

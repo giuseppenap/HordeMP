@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
+#include "HMP_ActionEffect.h"
 #include "NiagaraSystem.h"
 #include "GameFramework/Actor.h"
 #include "HMP_ProjectileBase.generated.h"
@@ -15,6 +17,7 @@ class UAudioComponent;
 class USoundAttenuation;
 class USoundBase;
 class UCameraShakeBase;
+class UHMP_ActionEffect;
 
 UCLASS()
 class HORDEMULTIPLAYER_API AHMP_ProjectileBase : public AActor
@@ -22,6 +25,12 @@ class HORDEMULTIPLAYER_API AHMP_ProjectileBase : public AActor
 	GENERATED_BODY()
 
 protected:
+
+	UPROPERTY(EditDefaultsOnly, Category = "Damage", meta = (OrderWithinCategory = 0))
+	FGameplayTag ParryTag;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	TSubclassOf<UHMP_ActionEffect> EffectActionClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Effects")
 	UNiagaraSystem* ImpactVFX;
@@ -56,7 +65,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Effects")
 	USoundBase* EnemyKilledSound;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Config")
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
 	float Damage;
 
 	UFUNCTION()

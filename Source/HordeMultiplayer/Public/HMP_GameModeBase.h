@@ -22,6 +22,10 @@ class HORDEMULTIPLAYER_API AHMP_GameModeBase : public AGameModeBase
 
 protected:
 
+	UPROPERTY(EditDefaultsOnly, Category = "GameMode")
+	float CreditsToGrantOnKill;
+	
+
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
 	TSubclassOf<AActor> MinionClass;
 	

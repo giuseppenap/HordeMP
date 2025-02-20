@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
+#include "HMP_ActionComponent.h"
 #include "UObject/NoExportTypes.h"
 #include "HMP_Action.generated.h"
 
@@ -15,13 +17,36 @@ class HORDEMULTIPLAYER_API UHMP_Action : public UObject
 {
 	GENERATED_BODY()
 
+protected:
+
+	UFUNCTION(BlueprintCallable, Category = Action)
+	UHMP_ActionComponent* GetOwningComponent() const;
+
+	UPROPERTY(EditDefaultsOnly, Category = Tags)
+	FGameplayTagContainer GrantedTags;
+
+	UPROPERTY(EditDefaultsOnly, Category = Tags)
+	FGameplayTagContainer BlockedTags;
+
+	bool bIsRunning;
+	
+	
 public:
 
+
+	UPROPERTY(EditDefaultsOnly, Category = Action)
+	bool bAutoStart;
+
+	UFUNCTION(BlueprintCallable, Category = Action)
+	bool IsRunning() const;
+	
+	UFUNCTION(BlueprintNativeEvent, Category = "Action")
+	bool CanStart(AActor* Instigator);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Action")
 	void StartAction(AActor* Instigator);
 
-	UFUNCTION(BlueprintNativeEvent, Category = "Action")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Action")
 	void StopAction(AActor* Instigator);
 
 	UPROPERTY(EditDefaultsOnly, Category = "Action")

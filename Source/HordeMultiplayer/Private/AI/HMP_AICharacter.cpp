@@ -4,6 +4,7 @@
 #include "AI/HMP_AICharacter.h"
 
 #include "BrainComponent.h"
+#include "HMP_ActionComponent.h"
 #include "AI/HMP_AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "HMP_AttributeComponent.h"
@@ -28,6 +29,8 @@ AHMP_AICharacter::AHMP_AICharacter()
 	GetMesh()->SetGenerateOverlapEvents(true);
 
 	TimeToHitParameter = "HitFlashTime";
+
+	ActionComp = CreateDefaultSubobject<UHMP_ActionComponent>("ActionComp");
 	
 }
 
