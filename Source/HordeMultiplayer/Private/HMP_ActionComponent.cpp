@@ -8,7 +8,10 @@
 UHMP_ActionComponent::UHMP_ActionComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+
+	SetIsReplicatedByDefault(true);
 }
+
 
 
 // Called when the game starts
@@ -74,6 +77,13 @@ bool UHMP_ActionComponent::StartActionByName(AActor* Instigator, FName ActionNam
 				GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FailedMsg);
 				continue;
 			}
+
+			// Is Client?
+			if (!GetOwner()->HasAuthority())
+			{
+				ServerStartAction(Instigator, ActionName);
+			}
+			
 			Action->StartAction(Instigator);
 			return true;
 		}
@@ -95,4 +105,9 @@ bool UHMP_ActionComponent::StopActionByName(AActor* Instigator, FName ActionName
 		}
 	}
 	return false;	
+}
+
+void UHMP_ActionComponent::ServerStartAction_Implementation(AActor* Instigator, FName ActionName)
+{
+	StartActionByName(Instigator, ActionName);
 }

@@ -11,16 +11,15 @@
 static TAutoConsoleVariable<bool> CVarDebutDrawInteraction(TEXT("hmp.InteractionDebuDraw"), false, TEXT("Enable Debug Lines for Interact Component."), ECVF_Cheat);
 
 
-// Sets default values for this component's properties
 UHMP_InteractionComponent::UHMP_InteractionComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
+
 	PrimaryComponentTick.bCanEverTick = true;
 
-	MaxInteractionDistance = 1000;
-
-	// ...
+	TraceDistance = 1000;
+	TraceRadius = 30.0f;
+	CollisionChannel = ECC_WorldDynamic;
+	
 }
 
 
@@ -28,8 +27,6 @@ UHMP_InteractionComponent::UHMP_InteractionComponent()
 void UHMP_InteractionComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// ...
 	
 }
 
@@ -39,65 +36,131 @@ void UHMP_InteractionComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+	APawn* MyPawn = Cast<APawn>(GetOwner());
+	if (MyPawn->IsLocallyControlled())
+	{
+		FindBestInteractable();
+	}
+
+}
+
+void UHMP_InteractionComponent::FindBestInteractable()
+{
+	bool bDebugDraw = CVarDebutDrawInteraction.GetValueOnGameThread();
+ 	
+ 	FCollisionObjectQueryParams ObjectQueryParams;
+ 	ObjectQueryParams.AddObjectTypesToQuery(CollisionChannel);
+ 
+ 	AActor* MyOwner = GetOwner();
+	
+ 	if (!MyOwner)
+ 	{
+ 		return;
+ 	}
+ 
+ 	// Get Camera Component
+ 	UCameraComponent* CameraComp = MyOwner->FindComponentByClass<UCameraComponent>();
+ 	if (!CameraComp)
+ 	{
+ 		return;
+ 	}
+ 
+ 	FVector CameraLocation = CameraComp->GetComponentLocation();
+ 	FRotator CameraRotation = CameraComp->GetComponentRotation(); // Get Rotation
+ 
+ 	// Line trace forward from the camera
+ 	FVector TraceStart = CameraLocation;
+ 	FVector TraceEnd = TraceStart + (CameraRotation.Vector() * TraceDistance);
+ 
+ 	// Perform the trace
+	
+ 	TArray<FHitResult> Hits;
+ 	FCollisionShape CollisionShape;
+ 	CollisionShape.SetSphere(TraceRadius);
+     
+ 	bool bBlockingHit = GetWorld()->SweepMultiByObjectType(Hits, TraceStart, TraceEnd, FQuat::Identity, ObjectQueryParams, CollisionShape);
+ 
+ 	FColor LineColor = bBlockingHit ? FColor::Green : FColor::Red;
+
+	// Clear Ref before trying to fill
+	FocusedActor = nullptr;
+	 
+	for (FHitResult Hit: Hits)
+	{
+		if (bDebugDraw)
+		{
+			DrawDebugSphere(GetWorld(), Hit.ImpactPoint, TraceRadius, 32, LineColor, false, 2.0f);
+		}
+		
+		TraceEnd = Hit.ImpactPoint;
+		AActor* HitActor = Hit.GetActor();
+		
+		if (HitActor && HitActor->Implements<UHMP_Gameplay_Interface>())
+		{
+			FocusedActor = HitActor;
+			break;
+		}
+	}
+
+	if (FocusedActor)
+	{
+		if (DefaultWidgetInstance == nullptr && ensure(DefaultWidgetClass))
+		{
+			DefaultWidgetInstance = CreateWidget<UHMP_WorldUserWidget>(GetWorld(), DefaultWidgetClass);
+		}
+
+		if (DefaultWidgetInstance)
+		{
+			DefaultWidgetInstance->AttachedActor = FocusedActor;
+
+			if (!DefaultWidgetInstance->IsInViewport())
+			{
+			DefaultWidgetInstance->AddToViewport();
+			}
+		}
+	}
+	else
+	{
+		if (DefaultWidgetInstance)
+		{
+			DefaultWidgetInstance->RemoveFromParent();
+		}
+	}
+	
+ 	// Draw Debug Line
+ 	if (bDebugDraw)
+ 	{
+ 	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, LineColor, false, 2.0f, 0, 2.0f);
+ 	}
 }
 
 void UHMP_InteractionComponent::PrimaryInteract()
 {
-	bool bDebugDraw = CVarDebutDrawInteraction.GetValueOnGameThread();
-	
-	FCollisionObjectQueryParams ObjectQueryParams;
-	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
-
-	AActor* MyOwner = GetOwner();
-	if (!MyOwner)
-	{
-		return;
-	}
-
-	// Get Camera Component
-	UCameraComponent* CameraComp = MyOwner->FindComponentByClass<UCameraComponent>();
-	if (!CameraComp)
-	{
-		return;
-	}
-
-	FVector CameraLocation = CameraComp->GetComponentLocation();
-	FRotator CameraRotation = CameraComp->GetComponentRotation(); // Get Rotation
-
-	// Line trace forward from the camera
-	FVector TraceStart = CameraLocation;
-	FVector TraceEnd = TraceStart + (CameraRotation.Vector() * MaxInteractionDistance);
-
-	// Perform the trace
-	FHitResult Hit;
-	FCollisionShape CollisionShape;
-	CollisionShape.SetSphere(30.0f);
-    
-	bool bBlockingHit = GetWorld()->SweepSingleByObjectType(
-		Hit, TraceStart, TraceEnd, FQuat::Identity, ObjectQueryParams, CollisionShape
-	);
-
-	FColor LineColor = bBlockingHit ? FColor::Green : FColor::Red;
-
-	if (bBlockingHit)
-	{
-		if (bDebugDraw)
-		{
-			DrawDebugSphere(GetWorld(), Hit.ImpactPoint, 30.0f, 32, LineColor, false, 2.0f);
-		}
-		TraceEnd = Hit.ImpactPoint;
-		AActor* HitActor = Hit.GetActor();
-		if (HitActor && HitActor->Implements<UHMP_Gameplay_Interface>())
-		{
-			APawn* MyPawn = Cast<APawn>(MyOwner);
-			IHMP_Gameplay_Interface::Execute_Interact(HitActor, MyPawn);
-		}
-	}
-
-	// Draw Debug Line
-	if (bDebugDraw)
-	{
-	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, LineColor, false, 2.0f, 0, 2.0f);
-	}
+	ServerInteract(FocusedActor);
 }
+
+
+void UHMP_InteractionComponent::ServerInteract_Implementation(AActor* InFocus)
+{
+	if (InFocus == nullptr)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("No focus Actor to Interact"));
+		return;
+	}
+
+	if (!InFocus->Implements<UHMP_Gameplay_Interface>())
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Focused Actor does not implement the required interface"));
+		return;
+	}
+	
+	APawn* MyPawn = Cast<APawn>(GetOwner());
+
+	if (ensure(InFocus))
+	{
+	IHMP_Gameplay_Interface::Execute_Interact(InFocus, MyPawn);
+	}
+	
+}
+
+

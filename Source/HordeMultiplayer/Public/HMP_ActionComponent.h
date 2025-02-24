@@ -39,6 +39,9 @@ public:
 
 protected:
 
+	UFUNCTION(Server, Reliable)
+	void ServerStartAction(AActor* Instigator, FName ActionName);
+
 	/* Grants abilities at game start */
 	UPROPERTY(EditAnywhere, Category = "Action")
 	TArray<TSubclassOf<UHMP_Action>> DefaultActions;

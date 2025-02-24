@@ -26,13 +26,13 @@ class HORDEMULTIPLAYER_API AHMP_ProjectileBase : public AActor
 
 protected:
 
-	UPROPERTY(EditDefaultsOnly, Category = "Damage", meta = (OrderWithinCategory = 0))
+	/*UPROPERTY(EditDefaultsOnly, Category = "Damage", meta = (OrderWithinCategory = 0))
 	FGameplayTag ParryTag;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
-	TSubclassOf<UHMP_ActionEffect> EffectActionClass;
+	TSubclassOf<UHMP_ActionEffect> EffectActionClass;*/
 
-	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Effects")
 	UNiagaraSystem* ImpactVFX;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
@@ -56,6 +56,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Effects")
 	USoundAttenuation* AttenuationProjectile;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Effects")
+	USoundAttenuation* AttenuationEffect;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Effects")
 	TSubclassOf<UCameraShakeBase> ImpactCameraShake;
 
@@ -63,13 +66,17 @@ protected:
 	USoundBase* EnemyHitSound;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Effects")
-	USoundBase* EnemyKilledSound;
+	USoundBase* EffectSound;
 
+	/*
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
-	float Damage;
+	float Damage;*/
 
-	UFUNCTION()
-	void OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	bool bShouldExplodeOnDamage;
+
+	/*UFUNCTION()
+	void OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);*/
 	
 	//virtual so it can be overriden in child classes
 	UFUNCTION()

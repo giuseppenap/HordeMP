@@ -56,7 +56,7 @@ void UHMP_Action_ProjectileAttack::AttackDelay_Elapsed(ACharacter* InstigatorCha
 
 		FVector TraceStart = InstigatorCharacter->GetPawnViewLocation();
 
-		FVector TraceEnd = TraceStart + (InstigatorCharacter->GetControlRotation().Vector() * 5000);
+		FVector TraceEnd = TraceStart + (InstigatorCharacter->GetControlRotation().Vector() * 5000); // @FixMe: Change Projectile range by variable
 
 		FHitResult Hit;
 

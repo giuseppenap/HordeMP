@@ -15,6 +15,8 @@ AHMP_PickupBase::AHMP_PickupBase()
 	SphereCollision->SetCollisionProfileName("Pickup");
 	RootComponent = SphereCollision;
 
+	bReplicates = true;
+
 }
 
 void AHMP_PickupBase::Interact_Implementation(APawn* InstigatorPawn)

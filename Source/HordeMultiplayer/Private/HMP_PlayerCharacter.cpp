@@ -18,7 +18,9 @@ AHMP_PlayerCharacter::AHMP_PlayerCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>("SpringArmComponent");
+	SpringArmComp->bUsePawnControlRotation = true;
 	SpringArmComp->SetupAttachment(RootComponent);
+	
 
 	CameraComp = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
 	CameraComp->SetupAttachment(SpringArmComp);
@@ -30,7 +32,6 @@ AHMP_PlayerCharacter::AHMP_PlayerCharacter()
 	ActionComp = CreateDefaultSubobject<UHMP_ActionComponent>("ActionComponent");
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
-
 	bUseControllerRotationYaw = false;
 
 }
@@ -154,15 +155,22 @@ void AHMP_PlayerCharacter::SpecialAttack()
 	{
 		GetMesh()->SetScalarParameterValueOnMaterials("TimeToHit", GetWorld()->GetTimeSeconds());
 		APlayerController* PC = Cast<APlayerController>(GetController());
-		PC->ClientStartCameraShake(ImpactCameraShake);
+		AttributeComp->ApplyRageChange(InstigatorActor, FMath::Abs(Delta));
+		if (PC)
+		{
+			PC->ClientStartCameraShake(ImpactCameraShake);
+		}
 	}
 	if (NewHealth <= 0.0f && Delta < 0.0f)
 	{
 		APlayerController* PC = Cast<APlayerController>(GetController());
-		PC->ClientStartCameraShake(DeathCameraShake);
+		if (PC)
+		{
+			PC->ClientStartCameraShake(DeathCameraShake);
+			DisableInput(PC);
+		}
 		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		DisableInput(PC);
 	}
  }
 

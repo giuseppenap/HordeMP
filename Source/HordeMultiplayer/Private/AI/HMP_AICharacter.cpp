@@ -11,6 +11,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Perception/PawnSensingComponent.h"
 #include "UI/HMP_WorldUserWidget.h"
 
@@ -79,6 +80,7 @@ void AHMP_AICharacter::OnHealthChangedImplementation(AActor* InstigatorActor, UH
 				AIC->GetBrainComponent()->StopLogic("Killed");
 			}
 
+			UGameplayStatics::PlaySoundAtLocation(this, DeathSoundClass, GetActorLocation(), GetActorRotation(), 1.0f, 1.0f, 0.0f, AttenuationDeath);
 			// ragdoll
 			GetMesh()->SetAllBodiesSimulatePhysics(true);
 			GetMesh()->SetCollisionProfileName("Ragdoll");

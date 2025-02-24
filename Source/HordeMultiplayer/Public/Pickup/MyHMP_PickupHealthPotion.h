@@ -29,6 +29,9 @@ public:
 	UNiagaraComponent* MeshVFX;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Config")
+	USoundBase* PickupSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Config")
 	float HealAmount;
 
 	FTimerHandle InactivateTimer;

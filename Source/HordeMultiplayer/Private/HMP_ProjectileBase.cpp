@@ -43,7 +43,10 @@ AHMP_ProjectileBase::AHMP_ProjectileBase()
 	AudioComp = CreateDefaultSubobject<UAudioComponent>("AudioComp");
 	AudioComp->SetupAttachment(RootComponent);
 	AudioComp->SetVolumeMultiplier(0.1f);
-	
+
+	bShouldExplodeOnDamage = true;
+
+	bReplicates = true;
 
 }
 
@@ -52,38 +55,9 @@ void AHMP_ProjectileBase::PostInitializeComponents()
 	Super::PostInitializeComponents();
 	AudioComp->FadeIn(0.5f);
 	SphereComp->OnComponentHit.AddDynamic(this, &AHMP_ProjectileBase::OnActorHit);
-	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &AHMP_ProjectileBase::OnActorOverlap);
 	SphereComp->IgnoreActorWhenMoving(GetInstigator(), true);
-}
-
-void AHMP_ProjectileBase::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if (OtherActor && OtherActor != GetInstigator())
-	{
-
-		UHMP_ActionComponent* ActionComp = Cast<UHMP_ActionComponent>(OtherActor->GetComponentByClass(UHMP_ActionComponent::StaticClass()));
-
-		if (ActionComp && ActionComp->ActiveGameplayTags.HasTag(ParryTag))
-		{
-			MovementComp->Velocity = -MovementComp->Velocity;
-
-			SetInstigator(Cast<APawn>(OtherActor));
-			return;
-		}
-
-		// Apply Damage & Impulse
-		if (UHMP_GameplayFunctionLibrary::ApplyDirectionalDamage(GetInstigator(), OtherActor, Damage, SweepResult))
-		{
-			Explode_Implementation();
-
-			if (ActionComp && EffectActionClass)
-			{
-				ActionComp->AddAction(GetInstigator(), EffectActionClass);
-			}
-		}
 	}
-}
+
 
 void AHMP_ProjectileBase::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
                                      UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
@@ -108,5 +82,10 @@ void AHMP_ProjectileBase::Explode_Implementation()
 }
 
 
+// void AHMP_ProjectileBase::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+// 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+// {
+// 	
+// }
 
 

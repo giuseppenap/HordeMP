@@ -3,6 +3,8 @@
 
 #include "HMP_ItemChest.h"
 
+#include "Net/UnrealNetwork.h"
+
 
 // Sets default values
 AHMP_ItemChest::AHMP_ItemChest()
@@ -17,24 +19,28 @@ AHMP_ItemChest::AHMP_ItemChest()
 	LidMesh->SetupAttachment(BaseMesh);
 
 	TargetPitch = 110;
+
+	bReplicates = true;
 }
 
-// Called when the game starts or when spawned
-void AHMP_ItemChest::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
 
-// Called every frame
-void AHMP_ItemChest::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
 
 void AHMP_ItemChest::Interact_Implementation(APawn* InstigatorPawn)
 {
-	LidMesh->SetRelativeRotation(FRotator(TargetPitch, 0, 0));
+	bLidOpened = !bLidOpened;
+	OnRep_LidOpened();
+	
 }
 
+void AHMP_ItemChest::OnRep_LidOpened()
+{
+	float CurrPitch = bLidOpened ? TargetPitch : 0.0f;
+	LidMesh->SetRelativeRotation(FRotator(CurrPitch, 0, 0));
+}
+
+void AHMP_ItemChest::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AHMP_ItemChest, bLidOpened);
+}

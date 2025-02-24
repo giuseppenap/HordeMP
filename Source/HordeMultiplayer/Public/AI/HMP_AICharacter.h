@@ -12,6 +12,8 @@ class UPawnSensingComponent;
 class UUserWidget;
 class UHMP_AttributeComponent;
 class UHMP_ActionComponent;
+class USoundBase;
+class USoundAttenuation;
 
 UCLASS()
 class HORDEMULTIPLAYER_API AHMP_AICharacter : public ACharacter
@@ -29,6 +31,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> HealthBarWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	USoundBase* DeathSoundClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	USoundAttenuation* AttenuationDeath;
 
 	UPROPERTY(VisibleAnywhere, Category = "Effects")
 	FName TimeToHitParameter;

@@ -5,6 +5,7 @@
 
 #include "HMP_AttributeComponent.h"
 #include "NiagaraComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 AMyHMP_PickupHealthPotion::AMyHMP_PickupHealthPotion()
 {
@@ -29,6 +30,7 @@ void AMyHMP_PickupHealthPotion::Interact_Implementation(APawn* InstigatorPawn)
 	{
 		if (AttributeComp->ApplyHealthChange(this, HealAmount))
 		{
+			UGameplayStatics::PlaySoundAtLocation(this, PickupSound, GetActorLocation(), GetActorRotation(), 0.3, 1, 0);
 			HideAndCooldownPowerup();
 		}
 	}

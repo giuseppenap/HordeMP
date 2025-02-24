@@ -9,6 +9,9 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnHealthChanged, AActor*, InstigatorActor, UHMP_AttributeComponent*, OwningComp, float, NewHealth, float, Delta);
 
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnRageChanged, AActor*, InstigatorActor, UHMP_AttributeComponent*, OwningComp, float, NewRage, float, Delta);
+
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class HORDEMULTIPLAYER_API UHMP_AttributeComponent : public UActorComponent
 {
@@ -27,14 +30,25 @@ public:
 
 protected:
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = "Attributes")
 	float Health;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = "Attributes")
 	float MaxHealth;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
 	float LastDamage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
+	float Rage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
+	float MaxRage;
+
+	UFUNCTION(NetMulticast, Reliable) //@Fixme: mark as unreliable once we moved the 'state' our of hmpcharacter
+	void MulticastHealthChanged(AActor* InstigatorActor, float NewHealth, float Delta);
+
+	void MulticastRageChanged(AActor* InstigatorActor, float NewRage, float Delta);
 
 public:
 
@@ -47,8 +61,14 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnHealthChanged OnHealthChanged;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnRageChanged OnRageChanged;
+
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
 	bool ApplyHealthChange(AActor* InstigatorActor, float Delta);
+
+	UFUNCTION(BlueprintCallable, Category = "Attributes")
+	bool ApplyRageChange(AActor* InstigatorActor, float Delta);
 
 	UFUNCTION()
 	float GetHealth() const;
@@ -61,6 +81,12 @@ public:
 
 	UFUNCTION()
 	float GetLastDamage() const;
+
+	UFUNCTION()
+	float GetRage() const;
+
+	UFUNCTION()
+	float GetMaxRage() const;
 
 		
 };
