@@ -3,6 +3,17 @@
 
 #include "HMP_Action.h"
 #include "HMP_ActionComponent.h"
+#include "HordeMultiplayer/HordeMultiplayer.h"
+#include "Net/UnrealNetwork.h"
+
+
+
+
+void UHMP_Action::Initialize(UHMP_ActionComponent* NewActionComp)
+{
+	ActionComp = NewActionComp;
+}
+
 bool UHMP_Action::CanStart_Implementation(AActor* Instigator)
 {
 	if (IsRunning())
@@ -22,34 +33,38 @@ bool UHMP_Action::CanStart_Implementation(AActor* Instigator)
 void UHMP_Action::StartAction_Implementation(AActor* Instigator)
 {
 	UE_LOG(LogTemp, Log, TEXT("Running: %s"), *GetNameSafe(this));
+	//LogOnScreen(this, FString::Printf(TEXT("Started: %s"), *ActionName.ToString()), FColor::Green);
 
 	UHMP_ActionComponent* Comp = GetOwningComponent();
 
 	Comp->ActiveGameplayTags.AppendTags(GrantedTags);
 
-	bIsRunning = true;
+	RepData.bIsRunning = true;
+	RepData.Instigator = Instigator;
 }
 
 void UHMP_Action::StopAction_Implementation(AActor* Instigator)
 {
 	UE_LOG(LogTemp, Log, TEXT("Stopped: %s"), *GetNameSafe(this));
+	//LogOnScreen(this, FString::Printf(TEXT("Stopped: %s"), *ActionName.ToString()), FColor::White);
 
-	ensureAlways(bIsRunning);
+	//ensureAlways(bIsRunning);
 
 	UHMP_ActionComponent* Comp = GetOwningComponent();
 
 	Comp->ActiveGameplayTags.RemoveTags(GrantedTags);
 
-	bIsRunning = false;
+	RepData.bIsRunning = false;
+	RepData.Instigator = Instigator;
 }
 
 UWorld* UHMP_Action::GetWorld() const
 {
 	// Outer is Set when creating action via NewObject<!>
-	UActorComponent* Comp = Cast<UActorComponent>(GetOuter());
-	if (Comp)
+	AActor* Actor = Cast<AActor>(GetOuter());
+	if (Actor)
 	{
-		return Comp->GetWorld();
+		return Actor->GetWorld();
 	}
 	
 	return nullptr;
@@ -57,11 +72,34 @@ UWorld* UHMP_Action::GetWorld() const
 
 UHMP_ActionComponent* UHMP_Action::GetOwningComponent() const
 {
-	return Cast<UHMP_ActionComponent>(GetOuter());
+	return ActionComp;
 }
+
+void UHMP_Action::OnRep_RepData()
+{
+	if (RepData.bIsRunning)
+	{
+		StartAction(RepData.Instigator);
+	}
+	else
+	{
+		StopAction(RepData.Instigator);
+	}
+}
+
+
 
 bool UHMP_Action::IsRunning() const
 {
-	return bIsRunning;
+	return RepData.bIsRunning;
 }
+
+void UHMP_Action::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UHMP_Action, RepData);
+	DOREPLIFETIME(UHMP_Action, ActionComp);
+}
+
 

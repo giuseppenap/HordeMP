@@ -32,7 +32,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Action")
 	bool StopActionByName(AActor* Instigator, FName ActionName);
 
-
+	UFUNCTION(BlueprintCallable, Category = "Actions")
+	UHMP_Action* GetAction(TSubclassOf<UHMP_Action> ActionClass) const;
 	
 
 	UHMP_ActionComponent();
@@ -42,17 +43,24 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void ServerStartAction(AActor* Instigator, FName ActionName);
 
+	UFUNCTION(Server, Reliable)
+	void ServerStopAction(AActor* Instigator, FName ActionName);
+
+
+
 	/* Grants abilities at game start */
 	UPROPERTY(EditAnywhere, Category = "Action")
 	TArray<TSubclassOf<UHMP_Action>> DefaultActions;
 	
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	TArray<UHMP_Action*> Actions;
 
 	
 	virtual void BeginPlay() override;
 
-public:	
+public:
+
+	bool ReplicateSubobjects(class UActorChannel* Channel, class FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 

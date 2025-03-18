@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "HMP_SaveGame.h"
 #include "EnvironmentQuery/EnvQueryInstanceBlueprintWrapper.h"
 #include "EnvironmentQuery/EnvQueryTypes.h"
 #include "GameFramework/GameModeBase.h"
@@ -11,6 +12,7 @@
 class UEnvQuery;
 class UEnvQueryInstanceBlueprintWrapper;
 class UCurveFloat;
+class UHMP_SaveGame;
 
 /**
  * 
@@ -21,6 +23,11 @@ class HORDEMULTIPLAYER_API AHMP_GameModeBase : public AGameModeBase
 	GENERATED_BODY()
 
 protected:
+
+	FString SlotName;
+
+	UPROPERTY()
+	UHMP_SaveGame* CurrentSaveGame;
 
 	UPROPERTY(EditDefaultsOnly, Category = "GameMode")
 	float CreditsToGrantOnKill;
@@ -70,10 +77,18 @@ public:
 	
 	AHMP_GameModeBase();
 
-
+	void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
 	
 	virtual void StartPlay() override;
 
+	void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
+
 	UFUNCTION(Exec)
 	void KillAll();
+
+	UFUNCTION(BlueprintCallable, Category = "Save Game")
+	void WriteSaveGame();
+
+	void LoadSaveGame();
+	
 };

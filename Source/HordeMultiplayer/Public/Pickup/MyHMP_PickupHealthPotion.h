@@ -7,7 +7,6 @@
 #include "MyHMP_PickupHealthPotion.generated.h"
 
 
-class UStaticMeshComponent;
 class UNiagaraComponent;
 
 /**
@@ -21,9 +20,7 @@ class HORDEMULTIPLAYER_API AMyHMP_PickupHealthPotion : public AHMP_PickupBase
 public:
 
 	AMyHMP_PickupHealthPotion();
-
-	UPROPERTY(EditAnywhere, Category = "Config")
-	UStaticMeshComponent* MeshComp;
+	
 
 	UPROPERTY(EditDefaultsOnly, Category = "Config")
 	UNiagaraComponent* MeshVFX;

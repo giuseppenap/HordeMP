@@ -8,6 +8,21 @@
 #include "UObject/NoExportTypes.h"
 #include "HMP_Action.generated.h"
 
+
+USTRUCT()
+struct FActionRepData
+{
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY()
+	bool bIsRunning;
+
+	UPROPERTY()
+	AActor* Instigator;
+};
+
 class UWorld;
 /**
  * 
@@ -19,6 +34,9 @@ class HORDEMULTIPLAYER_API UHMP_Action : public UObject
 
 protected:
 
+	UPROPERTY(Replicated)
+	UHMP_ActionComponent* ActionComp;
+
 	UFUNCTION(BlueprintCallable, Category = Action)
 	UHMP_ActionComponent* GetOwningComponent() const;
 
@@ -28,11 +46,17 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = Tags)
 	FGameplayTagContainer BlockedTags;
 
-	bool bIsRunning;
+	UPROPERTY(ReplicatedUsing="OnRep_RepData")
+	FActionRepData RepData;
+	//bool bIsRunning;
+
+	UFUNCTION()
+	void OnRep_RepData();
 	
 	
 public:
 
+	void Initialize(UHMP_ActionComponent* NewActionComp);
 
 	UPROPERTY(EditDefaultsOnly, Category = Action)
 	bool bAutoStart;
@@ -53,5 +77,9 @@ public:
 	FName ActionName;
 
 	UWorld* GetWorld() const override;
-	
+
+	bool IsSupportedForNetworking() const override
+	{
+		return true;
+	}
 };

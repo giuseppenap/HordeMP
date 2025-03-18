@@ -9,12 +9,10 @@
 
 AMyHMP_PickupHealthPotion::AMyHMP_PickupHealthPotion()
 {
-	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
-	MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	MeshComp->SetupAttachment(RootComponent);
-
 	MeshVFX = CreateDefaultSubobject<UNiagaraComponent>("MeshVFX");
 	MeshVFX->SetupAttachment(RootComponent);
+
+	bReplicates = true;
 }
 
 void AMyHMP_PickupHealthPotion::Interact_Implementation(APawn* InstigatorPawn)

@@ -20,9 +20,12 @@ UHMP_AttributeComponent::UHMP_AttributeComponent()
 
 
 
+
 bool UHMP_AttributeComponent::Kill(AActor* InstigatorActor)
 {
-	return ApplyHealthChange(InstigatorActor, -MaxHealth);
+	const auto bIsResult =  ApplyHealthChange(InstigatorActor, -MaxHealth);
+	ensure(IsAlive());
+	return bIsResult;
 }
 
 bool UHMP_AttributeComponent::IsAlive() const
@@ -75,28 +78,30 @@ bool UHMP_AttributeComponent::ApplyHealthChange(AActor* InstigatorActor, float D
 	}
 	
 	float OldHealth = Health;
-	
-	Health = FMath::Clamp(Health + Delta, 0.0f, MaxHealth);
-
-	float ActualDelta = Health - OldHealth;
+	float NewHealth =FMath::Clamp(Health + Delta, 0.0f, MaxHealth); 
+	float ActualDelta = NewHealth - OldHealth;
 	LastDamage = ActualDelta;
-	//OnHealthChanged.Broadcast(InstigatorActor, this, Health, ActualDelta);
-
-	if (ActualDelta != 0.0f)
-	{
-		MulticastHealthChanged(InstigatorActor, Health, ActualDelta);
-	}
 	
-	// Died
-	if (ActualDelta < 0.0f && Health == 0.0f)
+	// Is Server?
+	if (GetOwner()->HasAuthority())
 	{
-		AHMP_GameModeBase* GM = GetWorld()->GetAuthGameMode<AHMP_GameModeBase>();
-		if (GM)
+		Health = NewHealth;
+		if (ActualDelta != 0.0f)
 		{
-			GM->OnActorKilled(GetOwner(), InstigatorActor);
+			MulticastHealthChanged(InstigatorActor, Health, ActualDelta);
+		}
+		// Died
+		if (ActualDelta < 0.0f && Health == 0.0f)
+		{
+			AHMP_GameModeBase* GM = GetWorld()->GetAuthGameMode<AHMP_GameModeBase>();
+			if (GM)
+			{
+				GM->OnActorKilled(GetOwner(), InstigatorActor); 
+			}
 		}
 	}
-    return ActualDelta != 0;
+	
+	return ActualDelta != 0;
 }
 
 bool UHMP_AttributeComponent::ApplyRageChange(AActor* InstigatorActor, float Delta)
@@ -109,9 +114,12 @@ bool UHMP_AttributeComponent::ApplyRageChange(AActor* InstigatorActor, float Del
 
 	float ActualDelta = Rage - OldRage;
 
-	if (ActualDelta != 0.0f)
+	if (GetOwner()->HasAuthority())
 	{
-		MulticastRageChanged(InstigatorActor, Rage, ActualDelta);
+		if (ActualDelta != 0.0f)
+		{
+			MulticastRageChanged(InstigatorActor, Rage, ActualDelta);
+		}
 	}
 	
 	UE_LOG(LogTemp, Log, TEXT("%f"), Rage);
@@ -147,9 +155,9 @@ void UHMP_AttributeComponent::MulticastHealthChanged_Implementation(AActor* Inst
 	OnHealthChanged.Broadcast(InstigatorActor, this, NewHealth, Delta);
 }
 
-void UHMP_AttributeComponent::MulticastRageChanged(AActor* InstigatorActor, float NewRage, float Delta)
+void UHMP_AttributeComponent::MulticastRageChanged_Implementation(AActor* InstigatorActor, float NewRage, float Delta)
 {
-	OnRageChanged.Broadcast(InstigatorActor, this, NewRage, Delta);
+	OnRageChanged.Broadcast(InstigatorActor, this, NewRage, Delta); 
 }
 
 void UHMP_AttributeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -158,6 +166,8 @@ void UHMP_AttributeComponent::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 
 	DOREPLIFETIME(UHMP_AttributeComponent, Health);
 	DOREPLIFETIME(UHMP_AttributeComponent, MaxHealth);
+	DOREPLIFETIME(UHMP_AttributeComponent, Rage);
+	DOREPLIFETIME(UHMP_AttributeComponent, MaxRage);
 
 	//DOREPLIFETIME_CONDITION(UHMP_AttributeComponent, MaxHealth, COND_OwnerOnly);
 }

@@ -47,7 +47,7 @@ void AHMP_StandardProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComp
 
 			UGameplayStatics::PlaySound2D(this, EnemyHitSound, 1, 1, 0);
 
-			if (ActionComp && EffectActionClass)
+			if (ActionComp && EffectActionClass && HasAuthority())
 			{
 				ActionComp->AddAction(GetInstigator(), EffectActionClass);
 			}

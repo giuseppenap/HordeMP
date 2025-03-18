@@ -95,18 +95,52 @@ void AHMP_AICharacter::OnHealthChangedImplementation(AActor* InstigatorActor, UH
 	}
 }
 
+
+
 void AHMP_AICharacter::SetTargetActor(AActor* NewTarget)
 {
 	AAIController* AIC = Cast<AHMP_AIController>(GetController());
 	if (AIC)
 	{
-		AIC->GetBlackboardComponent()->SetValueAsObject("TargetActor", NewTarget);;
+		AIC->GetBlackboardComponent()->SetValueAsObject( "TargetActor", NewTarget);;
 	}
 }
 
+
 void AHMP_AICharacter::OnPawnSeen(APawn* Pawn)
 {
-	SetTargetActor(Pawn);
+
+	// Ignore if target already set
+	if (GetTargetActor() != Pawn)
+	{
+		SetTargetActor(Pawn);
+
+		MulticastPawnSeen();
+	}
 
 	//DrawDebugString(GetWorld(), GetActorLocation(), "Player SPOTTED", nullptr, FColor::White, 4.0f, true);
+}
+
+AActor* AHMP_AICharacter::GetTargetActor() const
+{
+	AAIController* AIC = Cast<AAIController>(GetController());
+	if (AIC)
+	{
+		return Cast<AActor>(AIC->GetBlackboardComponent()->GetValueAsObject("TargetActor"));
+	}
+
+	return nullptr;
+}
+
+
+void AHMP_AICharacter::MulticastPawnSeen_Implementation()
+{
+	UHMP_WorldUserWidget* NewWidget = CreateWidget<UHMP_WorldUserWidget>(GetWorld(), SpottedWidgetClass);
+    if (NewWidget)
+    {
+    	NewWidget->AttachedActor = this;
+    	// Index of 10 (or anything higher than default of 0) places this on top of any other widget.
+    	// May end up behind the minion health bar otherwise.
+    	NewWidget->AddToViewport(10);
+    }
 }

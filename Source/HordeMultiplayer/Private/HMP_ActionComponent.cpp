@@ -3,6 +3,9 @@
 
 #include "HMP_ActionComponent.h"
 #include "HMP_Action.h"
+#include "Engine/ActorChannel.h"
+#include "HordeMultiplayer/HordeMultiplayer.h"
+#include "Net/UnrealNetwork.h"
 
 
 UHMP_ActionComponent::UHMP_ActionComponent()
@@ -14,16 +17,37 @@ UHMP_ActionComponent::UHMP_ActionComponent()
 
 
 
+UHMP_Action* UHMP_ActionComponent::GetAction(TSubclassOf<UHMP_Action> ActionClass) const
+{
+	for (UHMP_Action* Action : Actions)
+	{
+		if (Action && Action->IsA(ActionClass))
+		{
+			return Action;
+		}
+	}
+
+	return nullptr;
+}
+
+
+
 // Called when the game starts
 void UHMP_ActionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	for (TSubclassOf<UHMP_Action> ActionClass : DefaultActions)
+	// Server only
+	if (GetOwner()->HasAuthority())
 	{
-		AddAction(GetOwner(), ActionClass);
+		for (TSubclassOf<UHMP_Action> ActionClass : DefaultActions)
+		{
+			AddAction(GetOwner(), ActionClass);
+		}
 	}
 }
+
+
 
 
 // Called every frame
@@ -33,6 +57,15 @@ void UHMP_ActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 
 	FString DebugMsg = GetNameSafe(GetOwner()) + " : " + ActiveGameplayTags.ToStringSimple(); 
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::White, DebugMsg);
+
+	for (UHMP_Action* Action : Actions)
+		{
+		FColor TextColor = Action->IsRunning() ? FColor::Blue : FColor::White;
+
+		FString ActionMsg = FString::Printf(TEXT("[%s] Action: %s "), *GetNameSafe(GetOwner()),*GetNameSafe(Action));
+
+		LogOnScreen(this, ActionMsg, TextColor, 0.0f);
+	}
 }
 
 
@@ -43,9 +76,17 @@ void UHMP_ActionComponent::AddAction(AActor* Instigator, TSubclassOf<UHMP_Action
 		return;
 	}
 
-	UHMP_Action* NewAction = NewObject<UHMP_Action>(this, ActionClass);
+	if (!GetOwner()->HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Client attempting to AddAction. [Class: %s]"), *GetNameSafe(ActionClass));
+		return;
+	}
+
+	UHMP_Action* NewAction = NewObject<UHMP_Action>(GetOwner(), ActionClass);
 	if (ensure(NewAction))
 	{
+		NewAction->Initialize(this);
+		
 		Actions.Add(NewAction);
 
 		if (NewAction->bAutoStart && ensure(NewAction->CanStart(Instigator)))
@@ -99,8 +140,13 @@ bool UHMP_ActionComponent::StopActionByName(AActor* Instigator, FName ActionName
 		{
 			if (Action->IsRunning())
 			{
-			Action->StopAction(Instigator);
-			return true;
+				// Is Client?
+				if (!GetOwner()->HasAuthority())
+				{
+					ServerStopAction(Instigator, ActionName);
+				}
+				Action->StopAction(Instigator);
+				return true;
 			}
 		}
 	}
@@ -111,3 +157,31 @@ void UHMP_ActionComponent::ServerStartAction_Implementation(AActor* Instigator, 
 {
 	StartActionByName(Instigator, ActionName);
 }
+
+void UHMP_ActionComponent::ServerStopAction_Implementation(AActor* Instigator, FName ActionName)
+{
+	StopActionByName(Instigator, ActionName);
+}
+bool UHMP_ActionComponent::ReplicateSubobjects(class UActorChannel* Channel, class FOutBunch* Bunch,
+	FReplicationFlags* RepFlags)
+{
+	bool WroteSomething =  Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
+	for (UHMP_Action* Action : Actions)
+	{
+		if (Action)
+		{
+			WroteSomething |= Channel->ReplicateSubobject(Action, *Bunch, *RepFlags);
+		}
+	}
+
+	return WroteSomething;
+}
+
+
+void UHMP_ActionComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UHMP_ActionComponent, Actions);
+}
+

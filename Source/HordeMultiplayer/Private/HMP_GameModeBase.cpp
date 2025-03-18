@@ -6,8 +6,11 @@
 #include "EngineUtils.h"
 #include "HMP_PlayerCharacter.h"
 #include "HMP_PlayerState.h"
+#include "HMP_SaveGame.h"
 #include "AI/HMP_AICharacter.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
+#include "GameFramework/GameStateBase.h"
+#include "Kismet/GameplayStatics.h"
 
 
 static TAutoConsoleVariable<bool> CVarSpawnBots(TEXT("hmp.SpawnBots"), true, TEXT("Enable spawning of bots via timer."), ECVF_Cheat);
@@ -25,6 +28,15 @@ AHMP_GameModeBase::AHMP_GameModeBase()
 	PlayerStateClass = AHMP_PlayerCharacter::StaticClass();
 
 	CreditsToGrantOnKill = 500.0f;
+
+	SlotName = "SaveGame01";
+}
+
+void AHMP_GameModeBase::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
+{
+	Super::InitGame(MapName, Options, ErrorMessage);
+
+	LoadSaveGame();
 }
 
 void AHMP_GameModeBase::StartPlay()
@@ -41,6 +53,19 @@ void AHMP_GameModeBase::StartPlay()
 			QueryInstance->GetOnQueryFinishedEvent().AddDynamic(this, &AHMP_GameModeBase::OnPickupSpawnQueryCompleted);
 		}
 	}
+}
+
+void AHMP_GameModeBase::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
+{
+	
+
+	AHMP_PlayerState* PS = NewPlayer->GetPlayerState<AHMP_PlayerState>();
+	if (PS)
+	{
+		PS->LoadPlayerState(CurrentSaveGame);
+	}
+
+	Super::HandleStartingNewPlayer_Implementation(NewPlayer);
 }
 
 void AHMP_GameModeBase::KillAll()
@@ -61,6 +86,8 @@ void AHMP_GameModeBase::KillAll()
 		}
 	}
 }
+
+
 
 
 void AHMP_GameModeBase::SpawnBotTimerElapsed()
@@ -217,3 +244,38 @@ void AHMP_GameModeBase::OnActorKilled(AActor* VictimActor, AActor* Killer)
 	UE_LOG(LogTemp, Log, TEXT("OnActorKilled: Victim: %s, Killer: %s"), *GetNameSafe(VictimActor), *GetNameSafe(Killer));
 }
 
+
+void AHMP_GameModeBase::WriteSaveGame()
+{
+
+	for (int32 i = 0; i < GameState->PlayerArray.Num(); i++)
+	{
+		AHMP_PlayerState* PS = Cast<AHMP_PlayerState>(GameState->PlayerArray[i]);
+		if (PS)
+		{
+			PS->SavePlayerState(CurrentSaveGame);
+			break; //single player only at this point.
+		}
+	}
+	UGameplayStatics::SaveGameToSlot(CurrentSaveGame, SlotName, 0);
+}
+
+void AHMP_GameModeBase::LoadSaveGame()
+{
+	if (UGameplayStatics::DoesSaveGameExist(SlotName, 0))
+	{
+		CurrentSaveGame = Cast<UHMP_SaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName, 0));
+		if (CurrentSaveGame == nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to load SaveGame Data."));
+			return;
+		}
+
+		UE_LOG(LogTemp, Warning, TEXT("Loaded SaveGame Data."));
+	}
+	else
+	{
+		CurrentSaveGame = Cast<UHMP_SaveGame>(UGameplayStatics::CreateSaveGameObject(UHMP_SaveGame::StaticClass()));
+		UE_LOG(LogTemp, Warning, TEXT("Created New SaveGame Data."));
+	}
+}

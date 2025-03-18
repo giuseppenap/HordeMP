@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "HMP_SaveGame.h"
 #include "GameFramework/PlayerState.h"
 #include "HMP_PlayerState.generated.h"
 
@@ -20,10 +21,15 @@ class HORDEMULTIPLAYER_API AHMP_PlayerState : public APlayerState
 
 protected:
 
-	UPROPERTY(EditDefaultsOnly, Category = "Credits")
+	UPROPERTY(EditDefaultsOnly,ReplicatedUsing="OnRep_Credits",Category="Credits")
 	int32 Credits;
 
+	UFUNCTION()
+	void OnRep_Credits(int32 OldCredits);
+	
 public:
+
+	
 
 	UFUNCTION(BlueprintCallable, Category = "Credits")
 	int32 GetCredits() const;
@@ -36,7 +42,11 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnCreditsChanged OnCreditsChanged;
-	
 
+	UFUNCTION(BlueprintNativeEvent)
+	void SavePlayerState(UHMP_SaveGame* SaveObject);
+
+	UFUNCTION(BlueprintNativeEvent)
+	void LoadPlayerState(UHMP_SaveGame* SaveObject);
 	
 };

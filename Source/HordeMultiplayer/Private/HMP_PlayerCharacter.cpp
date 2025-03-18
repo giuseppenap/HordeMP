@@ -161,6 +161,8 @@ void AHMP_PlayerCharacter::SpecialAttack()
 			PC->ClientStartCameraShake(ImpactCameraShake);
 		}
 	}
+
+	// Died
 	if (NewHealth <= 0.0f && Delta < 0.0f)
 	{
 		APlayerController* PC = Cast<APlayerController>(GetController());
@@ -171,6 +173,8 @@ void AHMP_PlayerCharacter::SpecialAttack()
 		}
 		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		SetLifeSpan(5.0f);
 	}
  }
 

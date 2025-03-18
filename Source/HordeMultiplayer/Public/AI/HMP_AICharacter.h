@@ -26,6 +26,10 @@ public:
 
 protected:
 
+	/* Key for AI Blackboard 'TargetActor' */
+	UPROPERTY(VisibleAnywhere, Category = "Effects")
+	FName TargetActorKey;
+
 	UPROPERTY(BlueprintReadOnly)
 	UHMP_WorldUserWidget* ActiveHealthBar;
 
@@ -34,6 +38,10 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Effects")
 	USoundBase* DeathSoundClass;
+
+	/* Widget to display when bot first sees a player. */
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> SpottedWidgetClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Effects")
 	USoundAttenuation* AttenuationDeath;
@@ -58,8 +66,15 @@ protected:
 	UFUNCTION()
 	void OnPawnSeen(APawn* Pawn);
 
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	AActor* GetTargetActor() const;
+
 	UFUNCTION()
 	void OnHealthChangedImplementation(AActor* InstigatorActor, UHMP_AttributeComponent* OwningComp, float NewHealth, float Delta);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastPawnSeen();
 	
 
 };
+
