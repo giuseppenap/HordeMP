@@ -7,6 +7,7 @@
 #include "HMP_PlayerCharacter.h"
 #include "HMP_PlayerState.h"
 #include "HMP_SaveGame.h"
+#include "SEnemyData.h"
 #include "AI/HMP_AICharacter.h"
 #include "EnvironmentQuery/EnvQueryManager.h"
 #include "GameFramework/GameStateBase.h"
@@ -57,8 +58,6 @@ void AHMP_GameModeBase::StartPlay()
 
 void AHMP_GameModeBase::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
 {
-	
-
 	AHMP_PlayerState* PS = NewPlayer->GetPlayerState<AHMP_PlayerState>();
 	if (PS)
 	{
@@ -86,9 +85,6 @@ void AHMP_GameModeBase::KillAll()
 		}
 	}
 }
-
-
-
 
 void AHMP_GameModeBase::SpawnBotTimerElapsed()
 {
@@ -146,9 +142,16 @@ void AHMP_GameModeBase::OnSpawnBotQueryCompleted(UEnvQueryInstanceBlueprintWrapp
 
 	if (Locations.IsValidIndex(0))
 	{
-		GetWorld()->SpawnActor<AActor>(MinionClass, Locations[0], FRotator::ZeroRotator);
+		if (EnemyTable)
+		{
+			TArray<FEnemyInfoRow*> Rows;
+			EnemyTable->GetAllRows("", Rows);
 
-		DrawDebugSphere(GetWorld(), Locations[0], 50.0f, 30, FColor::Blue, false, 60.0f	);
+			//GetRandomEnemy
+			int32 RandomIndex = FMath::RandRange(0, Rows.Num() - 1);
+			FEnemyInfoRow* SelectedRow = Rows[RandomIndex];
+			GetWorld()->SpawnActor<AActor>(SelectedRow->EnemyData->EnemyClass, Locations[0], FRotator::ZeroRotator);
+		}
 	}
 }
 
