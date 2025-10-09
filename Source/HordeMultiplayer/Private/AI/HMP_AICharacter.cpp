@@ -135,12 +135,19 @@ AActor* AHMP_AICharacter::GetTargetActor() const
 
 void AHMP_AICharacter::MulticastPawnSeen_Implementation()
 {
-	UHMP_WorldUserWidget* NewWidget = CreateWidget<UHMP_WorldUserWidget>(GetWorld(), SpottedWidgetClass);
-    if (NewWidget)
-    {
-    	NewWidget->AttachedActor = this;
-    	// Index of 10 (or anything higher than default of 0) places this on top of any other widget.
-    	// May end up behind the minion health bar otherwise.
-    	NewWidget->AddToViewport(10);
-    }
+	if (SpottedWidgetClass)
+	{
+		UHMP_WorldUserWidget* NewWidget = CreateWidget<UHMP_WorldUserWidget>(GetWorld(), SpottedWidgetClass);
+	    if (NewWidget)
+	    {
+    		NewWidget->AttachedActor = this;
+    		// Index of 10 (or anything higher than default of 0) places this on top of any other widget.
+    		// May end up behind the minion health bar otherwise.
+    		NewWidget->AddToViewport(10);
+	    }
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Seen Widget was not assigned in Enemy Blueprint! Please Assign it!, Instigator : %s"), *GetName());
+	}
 }
